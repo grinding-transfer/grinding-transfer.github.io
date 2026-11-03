@@ -136,6 +136,14 @@ table{min-width:1600px}
 .login-submit{width:100%;margin-top:18px;border:1px solid #39869a;border-radius:10px;padding:12px;background:linear-gradient(120deg,#1a6677,#24528a);color:#fff;font-weight:850;font:inherit;cursor:pointer}
 .login-submit:disabled{opacity:.55;cursor:wait}.login-status{min-height:20px;margin-top:12px;color:#ffbf86;font-size:12px;line-height:1.5}.login-foot{margin-top:14px;color:#8299b2;font-size:10px;text-align:center}
 
+
+/* Navigasi sheet: semua menu terlihat tanpa scroll horizontal */
+.sheet-tabs{display:flex;flex-wrap:wrap;overflow-x:visible;overflow-y:visible;justify-content:space-between;gap:6px;padding:7px;scrollbar-width:none}
+.sheet-tabs::-webkit-scrollbar{display:none}
+.sheet-tab{flex:1 1 auto;justify-content:center;white-space:normal;min-width:max-content;padding:10px 12px}
+@media(max-width:900px){.sheet-tab{flex:1 1 calc(50% - 6px);min-width:0}}
+@media(max-width:520px){.sheet-tab{flex:1 1 100%;justify-content:flex-start}}
+
 </style>
 <style id="skill-card-ktp-redesign">
 /* Kartu skill bergaya kartu identitas (landscape) */
