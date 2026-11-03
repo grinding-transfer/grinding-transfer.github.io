@@ -989,9 +989,17 @@ function recordsFor(m){return (attendanceSource[m]||{records:[]}).records;}
  const entryEsc=esc;
  const getEntryEmployees=()=>{
    const selected=$('attEntryTeam').value;
-   return ((window.__dashboardSupabaseData||{}).employees||[])
-     .filter(e=>selected==='R'?(e.team==='Pendukung'||e.team==='R'):e.team===selected)
-     .sort((a,b)=>a.name.localeCompare(b.name,'id'));
+   const normalizeTeam=value=>{
+     const raw=String(value??'').trim().toUpperCase();
+     if(raw==='A'||raw.includes('REGU A'))return 'A';
+     if(raw==='B'||raw.includes('REGU B'))return 'B';
+     if(raw==='C'||raw.includes('REGU C'))return 'C';
+     if(raw==='R'||raw==='P'||raw.includes('PENDUKUNG')||raw.includes('SUPPORT'))return 'R';
+     return raw;
+   };
+   const all=((window.__dashboardSupabaseData||{}).employees||[]);
+   return all.filter(e=>normalizeTeam(e.team??e.group??e.regu)===selected)
+     .sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'id'));
  };
  function drawEntryRows(){
    const month=$('attEntryMonth').value, team=$('attEntryTeam').value;
