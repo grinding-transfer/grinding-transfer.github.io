@@ -260,20 +260,27 @@ table{min-width:1600px}
 </section>
 </div>
 <div aria-hidden="true" class="sheet-pane" id="sheet-off" role="tabpanel">
-<div class="sheet-heading"><div><h2>Jadwal OFF / 休息排班</h2><p>Periode 21 Oktober–20 November 2026. Bintang ★ menandakan OFF. / 2026年10月21日至11月20日，★表示休息。</p></div><span class="sheet-tag">LEMBAR 4 / 工作表 4</span></div>
+<div class="sheet-heading"><div><h2>Jadwal OFF / 休息排班</h2><p>Periode 21 hingga 20 bulan berikutnya. Bintang ★ menandakan OFF. / 每期从21日至次月20日，★表示休息。</p></div><span class="sheet-tag">LEMBAR 4 / 工作表 4</span></div>
 <section class="off-section">
 <div class="off-head">
-<div><h2>Jadwal OFF karyawan / 员工休息排班</h2><p>Periode 21 Oktober–20 November 2026 · Tanda ★ berarti OFF / 2026年10月21日至11月20日 · ★ 表示休息</p></div>
+<div><h2>Jadwal OFF karyawan / 员工休息排班</h2><p>Periode berjalan dari tanggal 21 sampai tanggal 20 bulan berikutnya. Pilih periode untuk melihat atau mengisi jadwal. / 每期从当月21日至次月20日，可按期间查看和录入。</p></div>
 </div>
 <div class="off-summary">
 <div class="off-stat"><div class="label">TOTAL KARYAWAN / 员工总数</div><div class="num" id="offEmployeeTotal">—</div></div>
 <div class="off-stat"><div class="label">TOTAL HARI OFF TERCATAT / 已记录休息天数</div><div class="num" id="offTotalMarks">—</div></div>
-<div class="off-stat"><div class="label">TANGGAL / 日期范围</div><div class="num" style="font-size:17px">21/10–20/11/2026</div></div>
+<div class="off-stat"><div class="label">PERIODE DIPILIH / 当前期间</div><div class="num" id="offPeriodLabel" style="font-size:17px">21/11–20/12/2026</div></div>
 </div>
 <div class="off-panel">
-<div class="off-filters">
+<div class="off-filters" style="grid-template-columns:minmax(220px,1fr) minmax(180px,.7fr) minmax(160px,.6fr)">
+<select id="offPeriodFilter" aria-label="Pilih periode jadwal OFF / 选择休息排班期间"></select>
 <input aria-label="Cari jadwal OFF / 搜索休息排班" id="offSearch" placeholder="Cari nama atau perusahaan… / 搜索姓名或公司…" type="search"/>
 <select aria-label="Filter regu / 按班组筛选" id="offTeamFilter"><option value="">Semua regu / 所有班组</option><option value="A">Regu A / A班组</option><option value="B">Regu B / B班组</option><option value="C">Regu C / C班组</option><option value="Pendukung">Pendukung / 支持人员</option></select>
+</div>
+<div style="padding:14px 16px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:minmax(180px,1fr) minmax(180px,1fr) auto;gap:10px;align-items:end">
+<label style="font-size:12px;color:var(--muted)">Nama karyawan / 员工姓名<select id="offEntryEmployee" style="display:block;width:100%;margin-top:5px"></select></label>
+<label style="font-size:12px;color:var(--muted)">Tanggal OFF / 休息日期<input id="offEntryDate" type="date" style="display:block;width:100%;margin-top:5px"/></label>
+<button type="button" class="button" id="offAddButton">Tambah OFF / 添加休息日</button>
+<div id="offEntryStatus" style="grid-column:1/-1;color:var(--muted);font-size:12px">Pilih periode, karyawan, dan tanggal OFF. / 选择期间、员工和休息日期。</div>
 </div>
 <div class="off-chart-wrap">
 <div class="off-chart-title">Jumlah karyawan OFF per tanggal / 每日休息人数</div>
@@ -286,7 +293,7 @@ table{min-width:1600px}
 </table>
 <div class="off-none" hidden="" id="offEmpty">Tidak ada data yang cocok / 没有符合条件的数据</div>
 </div>
-<div class="off-foot">Sumber: file PENGATURAN OKTOBER-NOVEMBER.xlsx. Tanda matahari (☀) pada file sumber ditampilkan sebagai bintang (★) sesuai permintaan. / 数据来源：PENGATURAN OKTOBER-NOVEMBER.xlsx。源文件中的太阳符号（☀）按要求显示为星号（★）。</div>
+<div class="off-foot">Jadwal disimpan ke Supabase. Klik tanda ★ pada tabel untuk menghapus tanggal OFF tersebut. / 排班保存至 Supabase。点击表格中的 ★ 可删除该休息日期。</div>
 </div>
 </section>
 </div>
@@ -639,21 +646,47 @@ function renderSkillCharts(){
   const zero=distribution.map(t=>({label:t.label,n:t.counts[0],total:t.total})).sort((a,b)=>(b.total?b.n/b.total:0)-(a.total?a.n/a.total:0))[0];
   $("skillEvaluation").innerHTML=`<strong>Ringkasan mudah / 简单总结</strong><br>Skill dengan persentase tercatat terendah: <b>${lowestSkill.min.t.label}</b> untuk <b>${skillLabel[lowestSkill.k]}</b> (${lowestSkill.min.n} dari ${lowestSkill.min.total} orang).<br>Regu dengan bagian anggota tanpa skill tercatat paling besar: <b>${zero.label}</b> (${zero.n} dari ${zero.total} orang).<br><b>Catatan:</b> diagram memakai data yang tercatat. Pastikan kemampuan melalui praktik langsung sebelum menetapkan kompetensi. / 图表基于已记录数据，确定能力前请进行现场实操确认。`;
 }
+function offPeriodBounds(startValue){
+ const [y,m,d]=startValue.split('-').map(Number);
+ const start=new Date(y,m-1,d,12,0,0); const end=new Date(y,m,20,12,0,0);
+ const iso=x=>`${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`;
+ const fmt=x=>x.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+ return {start:iso(start),end:iso(end),label:`${fmt(start)} – ${fmt(end)}`};
+}
+function offPeriodStartForDate(dateValue){
+ const [y,m,d]=dateValue.split('-').map(Number); const x=new Date(y,m-1,d,12,0,0);
+ if(d>=21)return `${y}-${String(m).padStart(2,'0')}-21`;
+ const prev=new Date(y,m-2,21,12,0,0);return `${prev.getFullYear()}-${String(prev.getMonth()+1).padStart(2,'0')}-21`;
+}
+function shiftOffPeriod(value,delta){const [y,m]=value.split('-').map(Number);const d=new Date(y,m-1+delta,21,12,0,0);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-21`;}
 function renderOffSchedule(){
-  const q=$("offSearch").value.trim().toLowerCase(), team=$("offTeamFilter").value;
-  // Ambil regu terbaru dari master Data Karyawan, tetapi pertahankan tanggal OFF dari jadwal.
-  const previousOffByName=new Map(offSchedule.employees.map(e=>[e.name,e]));
-  const syncedOffEmployees=employees.map(e=>{const prior=previousOffByName.get(e.name);const dates=prior?.dates||[];return {name:e.name,company:e.company||"",team:e.team,dates,offCount:dates.length};});
-  const rows=syncedOffEmployees.filter(e=>(!q||`${e.name} ${e.company}`.toLowerCase().includes(q))&&(!team||e.team===team));
-  $("offEmployeeTotal").textContent=rows.length;
-  $("offTotalMarks").textContent=rows.reduce((n,e)=>n+e.offCount,0);
-  const dates=offSchedule.dates;
-  $("offTableHead").innerHTML=`<tr><th class="off-name">Nama karyawan / 员工姓名</th><th class="off-team">Regu / 班组</th><th class="off-company">PT</th><th class="off-total">Total OFF / 休息总数</th>${dates.map(d=>{const [y,m,day]=d.split("-");return `<th title="${d}">${day}/${m}</th>`}).join("")}</tr>`;
-  const maxDaily=Math.max(1,...dates.map(d=>rows.filter(e=>e.dates.includes(d)).length));
-  $("offDailyChart").innerHTML=dates.map(d=>{const n=rows.filter(e=>e.dates.includes(d)).length;const [y,m,day]=d.split("-");const month=m==="10"?"Okt":"Nov";return `<div class="off-daybar" title="${d}: ${n} karyawan OFF / ${n}人休息"><div class="count">${n}</div><div class="barspace"><div class="bar" style="height:${Math.max(3,n/maxDaily*58)}px"></div></div><div class="day">${day}/${m}</div></div>`}).join("");
-  $("offTableBody").innerHTML=rows.map(e=>`<tr><td class="off-name">${esc(e.name)}</td><td class="off-team"><span class="pill ${teamClass(e.team)}">${esc(teamLabel[e.team]||e.team||"—")}</span></td><td class="off-company">${esc(e.company||"—")}</td><td class="off-total">${e.offCount}</td>${dates.map(d=>e.dates.includes(d)?`<td class="off-mark" title="OFF / 休息">★</td>`:`<td class="off-empty">·</td>`).join("")}</tr>`).join("");
-  $("offEmpty").hidden=rows.length!==0;
-  $("offTableBody").parentElement.hidden=rows.length===0;
+ const periodSel=$('offPeriodFilter'); if(!periodSel)return;
+ const savedValue=periodSel.value;
+ const periodSet=new Set(['2026-11-21']);
+ offSchedule.dates.forEach(d=>periodSet.add(offPeriodStartForDate(d)));
+ for(let i=0;i<12;i++)periodSet.add(shiftOffPeriod('2026-11-21',i));
+ const periods=[...periodSet].sort();
+ periodSel.innerHTML=periods.map(v=>{const b=offPeriodBounds(v);return `<option value="${v}">${esc(b.label)}</option>`}).join('');
+ periodSel.value=periods.includes(savedValue)?savedValue:(periods.includes('2026-11-21')?'2026-11-21':periods[periods.length-1]);
+ const bounds=offPeriodBounds(periodSel.value); const dateList=[];
+ for(let d=new Date(bounds.start+'T12:00:00');d<=new Date(bounds.end+'T12:00:00');d.setDate(d.getDate()+1))dateList.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);
+ const q=$('offSearch').value.trim().toLowerCase(), team=$('offTeamFilter').value;
+ const previousOffByName=new Map(offSchedule.employees.map(e=>[e.name,e]));
+ const synced=employees.map(e=>{const prior=previousOffByName.get(e.name);const dates=(prior?.dates||[]).filter(d=>d>=bounds.start&&d<=bounds.end);return {id:e.id,name:e.name,company:e.company||'',team:e.team,dates,offCount:dates.length};});
+ const rows=synced.filter(e=>(!q||`${e.name} ${e.company}`.toLowerCase().includes(q))&&(!team||e.team===team));
+ $('offEmployeeTotal').textContent=rows.length;
+ $('offTotalMarks').textContent=rows.reduce((n,e)=>n+e.offCount,0);
+ $('offPeriodLabel').textContent=`${new Date(bounds.start+'T12:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit'})}–${new Date(bounds.end+'T12:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'numeric'})}`;
+ $('offTableHead').innerHTML=`<tr><th class="off-name">Nama karyawan / 员工姓名</th><th class="off-team">Regu / 班组</th><th class="off-company">PT</th><th class="off-total">Total OFF / 休息总数</th>${dateList.map(d=>{const [y,m,day]=d.split('-');return `<th title="${d}">${day}/${m}</th>`}).join('')}</tr>`;
+ const maxDaily=Math.max(1,...dateList.map(d=>rows.filter(e=>e.dates.includes(d)).length));
+ $('offDailyChart').innerHTML=dateList.map(d=>{const n=rows.filter(e=>e.dates.includes(d)).length;const [y,m,day]=d.split('-');return `<div class="off-daybar" title="${d}: ${n} karyawan OFF"><div class="count">${n}</div><div class="barspace"><div class="bar" style="height:${Math.max(3,n/maxDaily*58)}px"></div></div><div class="day">${day}/${m}</div></div>`}).join('');
+ $('offTableBody').innerHTML=rows.map(e=>`<tr><td class="off-name">${esc(e.name)}</td><td class="off-team"><span class="pill ${teamClass(e.team)}">${esc(teamLabel[e.team]||e.team||'—')}</span></td><td class="off-company">${esc(e.company||'—')}</td><td class="off-total">${e.offCount}</td>${dateList.map(d=>e.dates.includes(d)?`<td class="off-mark"><button type="button" data-off-delete="${esc(e.id)}" data-off-date="${d}" title="Hapus OFF ${d}" style="background:transparent;border:0;color:inherit;cursor:pointer;font:inherit">★</button></td>`:`<td class="off-empty">·</td>`).join('')}</tr>`).join('');
+ $('offEmpty').hidden=rows.length!==0; $('offTableBody').parentElement.hidden=rows.length===0;
+ const empSel=$('offEntryEmployee'); const priorEmp=empSel.value;
+ empSel.innerHTML=employees.map(e=>`<option value="${esc(e.id)}">${esc(e.name)} · ${esc(teamLabel[e.team]||e.team||'')}</option>`).join('');
+ if(employees.some(e=>e.id===priorEmp))empSel.value=priorEmp;
+ const dateInput=$('offEntryDate');dateInput.min=bounds.start;dateInput.max=bounds.end;
+ if(!dateInput.value||dateInput.value<bounds.start||dateInput.value>bounds.end)dateInput.value=bounds.start;
 }
 
 function renderOrgChart(){
@@ -843,7 +876,21 @@ async function init(){
   $("addEmployeeForm").addEventListener("submit",async e=>{e.preventDefault();const name=$("newEmpName").value.trim().replace(/\s+/g," ");if(!name)return; if(employees.some(x=>x.name.toLowerCase()===name.toLowerCase())){$("employeeManageStatus").textContent="Nama sudah terdaftar / 姓名已存在。";return;}const team=$("newEmpTeam").value;const joinISO=$("newEmpJoin").value;const join=joinISO?new Date(joinISO+"T12:00:00").toLocaleDateString("id-ID",{day:"2-digit",month:"short",year:"numeric"}):"";const eNew={name,company:$("newEmpCompany").value.trim(),job:$("newEmpJob").value.trim()||"Anggota / 成员",level:"1",team,teamRaw:team==="A"?"修磨转运A":team==="B"?"修磨转运B":team==="C"?"修磨转运C":team==="Pendukung"?"支持人员":"未指定",role:"Anggota",join,joinISO,skills:{"Baja Lebar":false,"Baja Balok":false,"Baja Bulat":false},skillLevels:{},photo:"",simperPhoto:"",riggerPhoto:"",phone:$("newEmpPhone").value.trim(),helmet:$("newEmpHelmet").value.trim(),nik:$("newEmpNik").value.trim()};try{const saved=await DashboardSupabase.saveEmployee(eNew);eNew.id=saved.id;}catch(err){$("employeeManageStatus").textContent="Gagal menyimpan ke Supabase: "+(err.message||err);return;}employees.push(eNew);persistEmployeeData();saveEmployeeTeams();saveSkillEdits();refreshEmployeeViews();$("addEmployeeForm").reset();$("newEmpTeam").value="A";$("employeeManageStatus").textContent=`Karyawan ${name} berhasil ditambahkan. Klik “Simpan & Unduh HTML” agar perubahan ikut tersimpan ke file. / 已添加员工，请点击“保存并下载 HTML”保存到文件。`;});
   $("rows").addEventListener("click",async e=>{const btn=e.target.closest("button[data-remove-employee]");if(!btn)return;const name=btn.dataset.removeEmployee;if(!confirm(`Hapus ${name} dari daftar karyawan aktif? Semua catatan kesalahan Sheet 4 atas nama karyawan ini juga akan dihapus. Tindakan ini tidak dapat dibatalkan. / 确定移除 ${name} 吗？该员工在第4表中的所有错误记录也将被删除，且无法撤销。`))return;const idx=employees.findIndex(x=>x.name===name);if(idx<0)return;try{await DashboardSupabase.deleteEmployee(employees[idx].id);}catch(err){alert("Gagal menghapus dari Supabase: "+(err.message||err));return;}employees.splice(idx,1);if(typeof window.removeSheet4EmployeeRecords==="function")window.removeSheet4EmployeeRecords(name);persistEmployeeData();saveEmployeeTeams();saveSkillEdits();refreshEmployeeViews();$("employeeManageStatus").textContent=`${name} dikeluarkan dari daftar aktif. Klik “Simpan & Unduh HTML” untuk menyimpan perubahan ke file. / 已从在职名单移除，请保存并下载 HTML。`;});
   $("skillTeamFilter").addEventListener("change",renderEmployeeSkillCards);
-  $("offSearch").addEventListener("input",renderOffSchedule);$("offTeamFilter").addEventListener("change",renderOffSchedule);
+  $("offSearch").addEventListener("input",renderOffSchedule);$("offTeamFilter").addEventListener("change",renderOffSchedule);$("offPeriodFilter").addEventListener("change",renderOffSchedule);
+  $("offAddButton").addEventListener("click",async()=>{
+    const employee=employees.find(e=>String(e.id)===$("offEntryEmployee").value);const date=$("offEntryDate").value;const bounds=offPeriodBounds($("offPeriodFilter").value);
+    if(!employee||!date){$("offEntryStatus").textContent='Pilih karyawan dan tanggal terlebih dahulu.';return;}
+    if(date<bounds.start||date>bounds.end){$("offEntryStatus").textContent='Tanggal harus berada dalam periode yang dipilih.';return;}
+    if(!window.DashboardSupabase||window.__dashboardDataSource!=='supabase'){ $("offEntryStatus").textContent='Login Foreman dan koneksi Supabase diperlukan.';return; }
+    if(offSchedule.employees.find(e=>e.name===employee.name)?.dates.includes(date)){ $("offEntryStatus").textContent='Tanggal OFF ini sudah tercatat untuk karyawan tersebut.';return; }
+    const btn=$("offAddButton");btn.disabled=true;btn.textContent='Menyimpan...';
+    try{await DashboardSupabase.saveOffSchedule(employee.id,date,{period_start:bounds.start,period_end:bounds.end,team:employee.team});
+      if(!offSchedule.dates.includes(date))offSchedule.dates.push(date);let row=offSchedule.employees.find(e=>e.name===employee.name);if(!row){row={name:employee.name,company:employee.company||'',team:employee.team,dates:[],offCount:0};offSchedule.employees.push(row);}if(!row.dates.includes(date))row.dates.push(date);row.offCount=row.dates.length;
+      $("offEntryStatus").textContent=`Jadwal OFF ${employee.name} pada ${date} berhasil disimpan. / 已保存。`;renderOffSchedule();
+    }catch(err){$("offEntryStatus").textContent='Gagal menyimpan: '+(err.message||String(err));}
+    finally{btn.disabled=false;btn.textContent='Tambah OFF / 添加休息日';}
+  });
+  $("offTableBody").addEventListener("click",async e=>{const btn=e.target.closest('[data-off-delete]');if(!btn)return;const id=btn.dataset.offDelete,date=btn.dataset.offDate;const emp=employees.find(x=>String(x.id)===id);if(!emp||!confirm(`Hapus jadwal OFF ${emp.name} tanggal ${date}?`))return;try{await DashboardSupabase.deleteOffSchedule(emp.id,date);const row=offSchedule.employees.find(x=>x.name===emp.name);if(row){row.dates=row.dates.filter(d=>d!==date);row.offCount=row.dates.length;}const stillUsed=offSchedule.employees.some(x=>x.dates.includes(date));if(!stillUsed)offSchedule.dates=offSchedule.dates.filter(d=>d!==date);$("offEntryStatus").textContent=`Jadwal OFF ${date} dihapus.`;renderOffSchedule();}catch(err){alert('Gagal menghapus jadwal: '+(err.message||err));}});
   renderOffSchedule();renderSkillCharts();renderEmployeeSkillCards();
   $("closeModal").addEventListener("click",closeModal);$("modalBack").addEventListener("click",e=>{if(e.target===$("modalBack"))closeModal()});
   render();
