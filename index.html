@@ -271,11 +271,15 @@ table{min-width:1600px}
 <div class="off-stat"><div class="label">PERIODE DIPILIH / 当前期间</div><div class="num" id="offPeriodLabel" style="font-size:17px">21/11–20/12/2026</div></div>
 </div>
 <div class="off-panel">
-<div class="off-filters" style="grid-template-columns:minmax(220px,1fr) minmax(180px,.7fr) minmax(160px,.6fr)">
-<select id="offPeriodFilter" aria-label="Pilih periode jadwal OFF / 选择休息排班期间"></select>
+<div class="off-filters" style="grid-template-columns:minmax(130px,.65fr) minmax(110px,.45fr) minmax(180px,1fr) minmax(160px,.7fr)">
+<select id="offMonthFilter" aria-label="Pilih bulan awal periode / 选择期间起始月份">
+<option value="01">Januari / 一月</option><option value="02">Februari / 二月</option><option value="03">Maret / 三月</option><option value="04">April / 四月</option><option value="05">Mei / 五月</option><option value="06">Juni / 六月</option><option value="07">Juli / 七月</option><option value="08">Agustus / 八月</option><option value="09">September / 九月</option><option value="10">Oktober / 十月</option><option value="11" selected>November / 十一月</option><option value="12">Desember / 十二月</option>
+</select>
+<input id="offYearFilter" type="number" min="1900" max="9999" step="1" value="2026" aria-label="Masukkan tahun awal periode / 输入期间起始年份" placeholder="Tahun / 年份"/>
 <input aria-label="Cari jadwal OFF / 搜索休息排班" id="offSearch" placeholder="Cari nama atau perusahaan… / 搜索姓名或公司…" type="search"/>
 <select aria-label="Filter regu / 按班组筛选" id="offTeamFilter"><option value="">Semua regu / 所有班组</option><option value="A">Regu A / A班组</option><option value="B">Regu B / B班组</option><option value="C">Regu C / C班组</option><option value="Pendukung">Pendukung / 支持人员</option></select>
 </div>
+<div style="padding:8px 16px;border-bottom:1px solid var(--line);color:var(--muted);font-size:11px">Periode otomatis: tanggal 21 pada bulan/tahun terpilih sampai tanggal 20 bulan berikutnya. / 自动期间：所选年月21日至次月20日。</div>
 <div style="padding:14px 16px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:minmax(180px,1fr) minmax(180px,1fr) auto;gap:10px;align-items:end">
 <label style="font-size:12px;color:var(--muted)">Nama karyawan / 员工姓名<select id="offEntryEmployee" style="display:block;width:100%;margin-top:5px"></select></label>
 <label style="font-size:12px;color:var(--muted)">Tanggal OFF / 休息日期<input id="offEntryDate" type="date" style="display:block;width:100%;margin-top:5px"/></label>
@@ -660,15 +664,12 @@ function offPeriodStartForDate(dateValue){
 }
 function shiftOffPeriod(value,delta){const [y,m]=value.split('-').map(Number);const d=new Date(y,m-1+delta,21,12,0,0);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-21`;}
 function renderOffSchedule(){
- const periodSel=$('offPeriodFilter'); if(!periodSel)return;
- const savedValue=periodSel.value;
- const periodSet=new Set(['2026-11-21']);
- offSchedule.dates.forEach(d=>periodSet.add(offPeriodStartForDate(d)));
- for(let i=0;i<12;i++)periodSet.add(shiftOffPeriod('2026-11-21',i));
- const periods=[...periodSet].sort();
- periodSel.innerHTML=periods.map(v=>{const b=offPeriodBounds(v);return `<option value="${v}">${esc(b.label)}</option>`}).join('');
- periodSel.value=periods.includes(savedValue)?savedValue:(periods.includes('2026-11-21')?'2026-11-21':periods[periods.length-1]);
- const bounds=offPeriodBounds(periodSel.value); const dateList=[];
+ const monthSel=$('offMonthFilter'),yearSel=$('offYearFilter'); if(!monthSel||!yearSel)return;
+ if(!yearSel.value){yearSel.value='2026';monthSel.value='11';}
+ const chosenYear=Number(yearSel.value);
+ if(!Number.isInteger(chosenYear)||chosenYear<1900||chosenYear>9999){$('offPeriodLabel').textContent='Masukkan tahun 1900–9999';return;}
+ const periodStart=`${String(chosenYear).padStart(4,'0')}-${monthSel.value}-21`;
+ const bounds=offPeriodBounds(periodStart); const dateList=[];
  for(let d=new Date(bounds.start+'T12:00:00');d<=new Date(bounds.end+'T12:00:00');d.setDate(d.getDate()+1))dateList.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);
  const q=$('offSearch').value.trim().toLowerCase(), team=$('offTeamFilter').value;
  const previousOffByName=new Map(offSchedule.employees.map(e=>[e.name,e]));
@@ -876,9 +877,9 @@ async function init(){
   $("addEmployeeForm").addEventListener("submit",async e=>{e.preventDefault();const name=$("newEmpName").value.trim().replace(/\s+/g," ");if(!name)return; if(employees.some(x=>x.name.toLowerCase()===name.toLowerCase())){$("employeeManageStatus").textContent="Nama sudah terdaftar / 姓名已存在。";return;}const team=$("newEmpTeam").value;const joinISO=$("newEmpJoin").value;const join=joinISO?new Date(joinISO+"T12:00:00").toLocaleDateString("id-ID",{day:"2-digit",month:"short",year:"numeric"}):"";const eNew={name,company:$("newEmpCompany").value.trim(),job:$("newEmpJob").value.trim()||"Anggota / 成员",level:"1",team,teamRaw:team==="A"?"修磨转运A":team==="B"?"修磨转运B":team==="C"?"修磨转运C":team==="Pendukung"?"支持人员":"未指定",role:"Anggota",join,joinISO,skills:{"Baja Lebar":false,"Baja Balok":false,"Baja Bulat":false},skillLevels:{},photo:"",simperPhoto:"",riggerPhoto:"",phone:$("newEmpPhone").value.trim(),helmet:$("newEmpHelmet").value.trim(),nik:$("newEmpNik").value.trim()};try{const saved=await DashboardSupabase.saveEmployee(eNew);eNew.id=saved.id;}catch(err){$("employeeManageStatus").textContent="Gagal menyimpan ke Supabase: "+(err.message||err);return;}employees.push(eNew);persistEmployeeData();saveEmployeeTeams();saveSkillEdits();refreshEmployeeViews();$("addEmployeeForm").reset();$("newEmpTeam").value="A";$("employeeManageStatus").textContent=`Karyawan ${name} berhasil ditambahkan. Klik “Simpan & Unduh HTML” agar perubahan ikut tersimpan ke file. / 已添加员工，请点击“保存并下载 HTML”保存到文件。`;});
   $("rows").addEventListener("click",async e=>{const btn=e.target.closest("button[data-remove-employee]");if(!btn)return;const name=btn.dataset.removeEmployee;if(!confirm(`Hapus ${name} dari daftar karyawan aktif? Semua catatan kesalahan Sheet 4 atas nama karyawan ini juga akan dihapus. Tindakan ini tidak dapat dibatalkan. / 确定移除 ${name} 吗？该员工在第4表中的所有错误记录也将被删除，且无法撤销。`))return;const idx=employees.findIndex(x=>x.name===name);if(idx<0)return;try{await DashboardSupabase.deleteEmployee(employees[idx].id);}catch(err){alert("Gagal menghapus dari Supabase: "+(err.message||err));return;}employees.splice(idx,1);if(typeof window.removeSheet4EmployeeRecords==="function")window.removeSheet4EmployeeRecords(name);persistEmployeeData();saveEmployeeTeams();saveSkillEdits();refreshEmployeeViews();$("employeeManageStatus").textContent=`${name} dikeluarkan dari daftar aktif. Klik “Simpan & Unduh HTML” untuk menyimpan perubahan ke file. / 已从在职名单移除，请保存并下载 HTML。`;});
   $("skillTeamFilter").addEventListener("change",renderEmployeeSkillCards);
-  $("offSearch").addEventListener("input",renderOffSchedule);$("offTeamFilter").addEventListener("change",renderOffSchedule);$("offPeriodFilter").addEventListener("change",renderOffSchedule);
+  $("offSearch").addEventListener("input",renderOffSchedule);$("offTeamFilter").addEventListener("change",renderOffSchedule);$("offMonthFilter").addEventListener("change",renderOffSchedule);$("offYearFilter").addEventListener("change",renderOffSchedule);
   $("offAddButton").addEventListener("click",async()=>{
-    const employee=employees.find(e=>String(e.id)===$("offEntryEmployee").value);const date=$("offEntryDate").value;const bounds=offPeriodBounds($("offPeriodFilter").value);
+    const employee=employees.find(e=>String(e.id)===$("offEntryEmployee").value);const date=$("offEntryDate").value;const bounds=offPeriodBounds(`${$("offYearFilter").value}-${$("offMonthFilter").value}-21`);
     if(!employee||!date){$("offEntryStatus").textContent='Pilih karyawan dan tanggal terlebih dahulu.';return;}
     if(date<bounds.start||date>bounds.end){$("offEntryStatus").textContent='Tanggal harus berada dalam periode yang dipilih.';return;}
     if(!window.DashboardSupabase||window.__dashboardDataSource!=='supabase'){ $("offEntryStatus").textContent='Login Foreman dan koneksi Supabase diperlukan.';return; }
