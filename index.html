@@ -367,7 +367,7 @@ table{min-width:1600px}
 <h3>Input absensi bulanan / 月度考勤录入</h3>
 <p class="att-sub">Pilih bulan dan regu, lalu isi jumlah hari Hadir, Sakit, Izin, dan Mangkir untuk setiap karyawan. Total harus 25 hari. / 选择月份和班组，填写每位员工的出勤、病假、事假及旷工天数，合计必须为25天。</p>
 <div class="att-toolbar">
-<label for="attEntryMonth">Bulan / 月份</label><input id="attEntryMonth" type="month" value="2026-11"/>
+<label for="attEntryMonth">Bulan / 月份</label><input id="attEntryMonth" type="month" value="2026-09"/>
 <label for="attEntryTeam">Regu / 班组</label><select id="attEntryTeam"><option value="A">Regu A</option><option value="B">Regu B</option><option value="C">Regu C</option><option value="R">Pendukung</option></select>
 <button type="button" class="button" id="attLoadEntry">Tampilkan karyawan / 显示员工</button>
 <button type="button" class="button" id="attSaveEntry">Simpan absensi / 保存考勤</button>
@@ -987,7 +987,12 @@ function recordsFor(m){return (attendanceSource[m]||{records:[]}).records;}
  // Input absensi manual bulanan: simpan per karyawan menggunakan upsert Supabase.
  const entryRows=$('attEntryRows'), entryStatus=$('attEntryStatus');
  const entryEsc=esc;
- const getEntryEmployees=()=>((window.__dashboardSupabaseData||{}).employees||[]).filter(e=>(e.team||'')=== $('attEntryTeam').value).sort((a,b)=>a.name.localeCompare(b.name,'id'));
+ const getEntryEmployees=()=>{
+   const selected=$('attEntryTeam').value;
+   return ((window.__dashboardSupabaseData||{}).employees||[])
+     .filter(e=>selected==='R'?(e.team==='Pendukung'||e.team==='R'):e.team===selected)
+     .sort((a,b)=>a.name.localeCompare(b.name,'id'));
+ };
  function drawEntryRows(){
    const month=$('attEntryMonth').value, team=$('attEntryTeam').value;
    if(!month){entryStatus.textContent='Pilih bulan terlebih dahulu.';return;}
