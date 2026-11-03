@@ -331,7 +331,7 @@ table{min-width:1600px}
 <section class="s4-card" style="margin-top:18px"><h3 style="margin:0 0 6px">Perbandingan kesalahan setiap regu / 各班组错误对比</h3><p class="s4-small">Pilih bulan untuk melihat rekap pada bulan tersebut. Jumlah dihitung otomatis dari catatan yang dimasukkan. / 选择月份查看该月统计，数量根据录入记录自动计算。</p><div class="s4-actions" style="align-items:center"><label for="s4MonthFilter"><strong>Filter bulan / 月份筛选：</strong></label><select class="s4-btn" id="s4MonthFilter" style="background:#fff;border:1px solid #cbd5e1"><option value="">Semua bulan / 所有月份</option></select><span class="s4-btn primary" id="s4FilteredTotal" style="cursor:default">Total kesalahan: 0</span></div><div class="s4-chart" id="s4TeamChart"></div><h3 style="margin:20px 0 6px">Kesalahan setiap orang dalam regu / 各班组员工错误对比</h3><p class="s4-small">Pilih bulan untuk melihat kesalahan setiap orang pada bulan tersebut. / 选择月份查看该月每位员工的错误次数。</p><div class="s4-actions" style="align-items:center"><label for="s4PersonMonthFilter"><strong>Filter bulan per orang / 员工月份筛选：</strong></label><select class="s4-btn" id="s4PersonMonthFilter" style="background:#fff;border:1px solid #cbd5e1"><option value="">Semua bulan / 所有月份</option></select></div><div class="s4-person-list" id="s4PersonChart"></div></section></div>
 </div>
 <div aria-hidden="true" class="sheet-pane" id="sheet-attendance" role="tabpanel">
-<div class="sheet-heading"><div><h2>Kehadiran Karyawan / 员工考勤</h2><p>DATA JULI 2026 / 2026年7月考勤数据 — Nama, regu, sakit, izin, mangkir, jumlah ketidakhadiran, dan persentase kehadiran. / 员工姓名、班组、病假、事假、旷工、缺勤合计及出勤率。</p></div><span class="sheet-tag">LEMBAR 5 / 工作表 5</span></div>
+<div class="sheet-heading"><div><h2>Kehadiran Karyawan / 员工考勤</h2><p>REKAP ABSENSI BULANAN / 月度考勤统计 — Nama, regu, hadir, sakit, izin, mangkir, dan persentase kehadiran. / 员工姓名、班组、病假、事假、旷工、缺勤合计及出勤率。</p></div><span class="sheet-tag">LEMBAR 5 / 工作表 5</span></div>
 <style>
       #sheet-attendance .att-card{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:18px;margin-bottom:16px;min-width:0}
       #sheet-attendance .att-card h3{font-size:15px;margin:0 0 5px}
@@ -363,9 +363,21 @@ table{min-width:1600px}
 <div class="att-stat"><span>RATA-RATA KEHADIRAN BULANAN / 月平均出勤率</span><strong>97%</strong></div>
 <div class="att-stat"><span>BULAN DIPILIH / 当前月份</span><strong style="font-size:18px">Juli 2026</strong></div>
 </div>
+<section class="att-card" id="attManualPanel">
+<h3>Input absensi bulanan / 月度考勤录入</h3>
+<p class="att-sub">Pilih bulan dan regu, lalu isi jumlah hari Hadir, Sakit, Izin, dan Mangkir untuk setiap karyawan. Total harus 25 hari. / 选择月份和班组，填写每位员工的出勤、病假、事假及旷工天数，合计必须为25天。</p>
+<div class="att-toolbar">
+<label for="attEntryMonth">Bulan / 月份</label><input id="attEntryMonth" type="month" value="2026-11"/>
+<label for="attEntryTeam">Regu / 班组</label><select id="attEntryTeam"><option value="A">Regu A</option><option value="B">Regu B</option><option value="C">Regu C</option><option value="R">Pendukung</option></select>
+<button type="button" class="button" id="attLoadEntry">Tampilkan karyawan / 显示员工</button>
+<button type="button" class="button" id="attSaveEntry">Simpan absensi / 保存考勤</button>
+</div>
+<div id="attEntryStatus" class="att-pending" role="status">Pilih bulan dan regu untuk mulai mengisi.</div>
+<div class="att-table-wrap" style="margin-top:12px"><table id="attEntryTable" style="min-width:850px"><thead><tr><th>Nama karyawan / 员工姓名</th><th>Hadir / 出勤</th><th>Sakit / 病假</th><th>Izin / 事假</th><th>Mangkir / 旷工</th><th>Total hari / 合计</th><th>Persentase / 出勤率</th></tr></thead><tbody id="attEntryRows"><tr><td class="att-empty" colspan="7">Menunggu data karyawan / 等待员工数据</td></tr></tbody></table></div>
+</section>
 <section class="att-card">
 <h3>Daftar kehadiran karyawan / 员工考勤名单</h3>
-<p class="att-sub">Data berasal dari sheet DATA RECORD pada file Excel bulan yang dipilih. Nilai SAKIT, IZIN, MANGKIR, JUMLAH, dan persentase mengikuti sumber. / 数据来自所选月份 Excel 文件的 DATA RECORD 工作表。 Kolom bulan mengikuti data rekap yang tersedia; file sumber tidak mencantumkan tanggal harian. / 月份按现有月度汇总数据展示；源文件未提供每日日期。</p>
+<p class="att-sub">Masukkan absensi setiap karyawan secara manual. Data tersimpan ke Supabase dan dapat diperbarui kapan saja. / 手动录入每位员工的考勤，数据保存至 Supabase，可随时修改。</p>
 <div class="att-toolbar"><label for="attMonth">Bulan / 月份</label><select id="attMonth"><option value="">Menunggu login / 登录后加载</option></select><input id="attSearch" placeholder="Cari nama karyawan / 搜索员工姓名" type="search"/><label for="attTeamFilter">Filter regu / 班组筛选</label><select id="attTeamFilter"><option value="">Semua regu / 所有班组</option><option value="A">Regu A / A班组</option><option value="B">Regu B / B班组</option><option value="C">Regu C / C班组</option><option value="R">Pendukung / 支持人员</option></select><span class="att-pending">Data Juli 2026 dimuat / 已载入2026年7月数据</span></div>
 <div class="att-table-wrap"><table><thead><tr><th>Bulan / Tahun<br/>月份 / 年份</th><th>Regu / 班组</th><th>Nama Karyawan / 员工姓名</th><th>Status Kehadiran / 出勤状态</th><th>Keterangan / 备注</th></tr></thead><tbody></tbody></table></div>
 </section>
@@ -968,8 +980,81 @@ function recordsFor(m){return (attendanceSource[m]||{records:[]}).records;}
  }
  function esc(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
  initSelect('attMonth');initSelect('attPercentMonth');initSelect('attTeamMonth');
+
  ['attMonth','attPercentMonth','attTeamMonth','attSearch','attTeamFilter'].forEach(id=>$(id)?.addEventListener('input',render));
  render();
+
+ // Input absensi manual bulanan: simpan per karyawan menggunakan upsert Supabase.
+ const entryRows=$('attEntryRows'), entryStatus=$('attEntryStatus');
+ const entryEsc=esc;
+ const getEntryEmployees=()=>((window.__dashboardSupabaseData||{}).employees||[]).filter(e=>(e.team||'')=== $('attEntryTeam').value).sort((a,b)=>a.name.localeCompare(b.name,'id'));
+ function drawEntryRows(){
+   const month=$('attEntryMonth').value, team=$('attEntryTeam').value;
+   if(!month){entryStatus.textContent='Pilih bulan terlebih dahulu.';return;}
+   const emps=getEntryEmployees();
+   if(!emps.length){entryRows.innerHTML='<tr><td colspan="7" class="att-empty">Data karyawan belum dimuat. Silakan login ulang / 员工资料尚未加载，请重新登录。</td></tr>';return;}
+   const existing=(window.__attendanceSource[month]?.records||[]);
+   entryRows.innerHTML=emps.map(emp=>{
+     const r=existing.find(x=>x.name===emp.name&&x.group===team)||{};
+     const hadir=Number(r.present)||0, sakit=Number(r.sick)||0, izin=Number(r.izin)||0, mangkir=Number(r.mangkir)||0;
+     const total=hadir+sakit+izin+mangkir;
+     return `<tr data-employee-id="${entryEsc(emp.id)}" data-employee-name="${entryEsc(emp.name)}">
+       <td>${entryEsc(emp.name)}</td>
+       ${[['present',hadir],['sick',sakit],['izin',izin],['mangkir',mangkir]].map(([k,v])=>`<td><input type="number" min="0" max="25" step="1" value="${v}" data-att="${k}" style="width:76px;background:#0c1727;border:1px solid #2a3c54;border-radius:8px;padding:8px;color:var(--text)"></td>`).join('')}
+       <td data-total>${total}/25</td><td data-percent>${(total===25?hadir/25*100:0).toFixed(0)}%</td>
+     </tr>`;
+   }).join('');
+   entryStatus.textContent=`${emps.length} karyawan dimuat. Isi semua kolom, lalu simpan. / 已加载${emps.length}名员工。`;
+ }
+ entryRows.addEventListener('input',e=>{
+   const tr=e.target.closest('tr'); if(!tr||!e.target.matches('[data-att]'))return;
+   const vals=[...tr.querySelectorAll('[data-att]')].map(x=>Math.max(0,Number(x.value)||0));
+   const total=vals.reduce((a,b)=>a+b,0);
+   tr.querySelector('[data-total]').textContent=total+'/25';
+   tr.querySelector('[data-percent]').textContent=(total===25?vals[0]/25*100:0).toFixed(0)+'%';
+ });
+ $('attLoadEntry').addEventListener('click',drawEntryRows);
+ $('attEntryTeam').addEventListener('change',drawEntryRows);
+ $('attEntryMonth').addEventListener('change',drawEntryRows);
+ $('attSaveEntry').addEventListener('click',async()=>{
+   const month=$('attEntryMonth').value;
+   const rows=[...entryRows.querySelectorAll('tr[data-employee-id]')];
+   if(!month){entryStatus.textContent='Pilih bulan terlebih dahulu.';return;}
+   if(!rows.length){entryStatus.textContent='Tampilkan daftar karyawan terlebih dahulu.';return;}
+   if(!window.DashboardSupabase||window.__dashboardDataSource!=='supabase'){entryStatus.textContent='Login Foreman dan koneksi Supabase diperlukan.';return;}
+   const payload=rows.map(tr=>{
+     const v={};tr.querySelectorAll('[data-att]').forEach(inp=>v[inp.dataset.att]=Number(inp.value)||0);
+     return {id:tr.dataset.employeeId,name:tr.dataset.employeeName,group:$('attEntryTeam').value,...v,total:v.present+v.sick+v.izin+v.mangkir};
+   });
+   const invalid=payload.filter(x=>x.total!==25||Object.values({p:x.present,s:x.sick,i:x.izin,m:x.mangkir}).some(n=>n<0||!Number.isInteger(n)));
+   if(invalid.length){entryStatus.textContent=`Periksa ${invalid.length} baris: jumlah Hadir + Sakit + Izin + Mangkir harus tepat 25 hari. / 请检查${invalid.length}行，四项合计必须为25天。`;return;}
+   const btn=$('attSaveEntry');btn.disabled=true;btn.textContent='Menyimpan... / 保存中...';
+   try{
+     for(const x of payload){
+       const absent=x.sick+x.izin+x.mangkir;
+       await DashboardSupabase.saveAttendance(x.id,month,{
+         group:x.group,team:x.group,workdays:25,present:x.present,hadir:x.present,
+         sick:x.sick,izin:x.izin,mangkir:x.mangkir,absent,total:absent,
+         percent:x.present/25*100
+       });
+     }
+     const fresh=await DashboardSupabase.loadDashboard();
+     window.__dashboardSupabaseData=fresh;
+     const rebuilt={};
+     (fresh.attendanceRecords||[]).forEach(r=>{
+       const m=r.attendance_month;if(!m)return;
+       if(!rebuilt[m]){const d=new Date(m+'-01T00:00:00');rebuilt[m]={label:Number.isNaN(d.getTime())?m:d.toLocaleDateString('id-ID',{month:'long',year:'numeric'}),records:[]};}
+       const d=r.details||{};
+       rebuilt[m].records.push({name:r.employee_name||'',group:d.group||d.team||'',absent:Number(d.absent)||0,sick:Number(d.sick)||0,izin:Number(d.izin)||0,mangkir:Number(d.mangkir)||0,total:Number(d.total)||0,workdays:Number(d.workdays)||25,present:Number(d.present??d.hadir)||0,percent:Number(d.percent)||0});
+     });
+     window.__attendanceSource=rebuilt;
+     window.dispatchEvent(new CustomEvent('dashboard:data-loaded',{detail:{employees:fresh.employees,attendanceSource:rebuilt}}));
+     entryStatus.textContent=`Berhasil menyimpan ${payload.length} karyawan untuk ${month}. / 已成功保存${payload.length}名员工的${month}考勤。`;
+     drawEntryRows();
+   }catch(err){console.error(err);entryStatus.textContent='Gagal menyimpan: '+(err.message||String(err));}
+   finally{btn.disabled=false;btn.textContent='Simpan absensi / 保存考勤';}
+ });
+
 })();
 </script>
 </div>
