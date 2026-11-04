@@ -1110,7 +1110,7 @@ function recordsFor(m){return (attendanceSource[m]||{records:[]}).records;}
      if(raw==='A'||raw.includes('REGU A'))return 'A';
      if(raw==='B'||raw.includes('REGU B'))return 'B';
      if(raw==='C'||raw.includes('REGU C'))return 'C';
-     if(raw==='R'||raw==='P'||raw.includes('Reguler')||raw.includes('SUPPORT'))return 'R';
+     if(raw==='R'||raw==='P'||raw.includes('REGULER')||raw.includes('SUPPORT'))return 'R';
      return raw;
    };
    const all=((window.__dashboardSupabaseData||{}).employees||[]);
