@@ -1114,7 +1114,20 @@ function recordsFor(m){return (attendanceSource[m]||{records:[]}).records;}
      return raw;
    };
    const all=((window.__dashboardSupabaseData||{}).employees||[]);
-   return all.filter(e=>[e.team,e.group,e.regu,e.teamRaw,e.team_raw].some(value=>normalizeTeam(value)===selected))
+   // Kelompok Reguler adalah kelompok khusus di luar Regu A, B, dan C.
+   // Penetapan ini hanya untuk formulir absensi; tidak mengubah team karyawan di Supabase.
+   const regularNames=new Set([
+     'HERMAN SAPUTRA',
+     'ASWAR',
+     'LAODE YAKUB VAKAD MUHADAR'
+   ]);
+   const attendanceTeam=e=>{
+     const name=String(e.name||'').trim().replace(/\\s+/g,' ').toUpperCase();
+     if(regularNames.has(name))return 'R';
+     return [e.team,e.group,e.regu,e.teamRaw,e.team_raw]
+       .map(normalizeTeam).find(team=>['A','B','C','R'].includes(team))||'';
+   };
+   return all.filter(e=>attendanceTeam(e)===selected)
      .sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'id'));
  };
  function drawEntryRows(){
