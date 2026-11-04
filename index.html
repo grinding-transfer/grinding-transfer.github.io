@@ -458,12 +458,7 @@ nav.sheet-tabs[role="tablist"] > .sheet-tab {
 <div class="att-toolbar"><label for="attMonth">Bulan / 月份</label><select id="attMonth"><option value="">Menunggu login / 登录后加载</option></select><input id="attSearch" placeholder="Cari nama karyawan / 搜索员工姓名" type="search"/><label for="attTeamFilter">Filter regu / 班组筛选</label><select id="attTeamFilter"><option value="">Semua regu / 所有班组</option><option value="A">Regu A / A班组</option><option value="B">Regu B / B班组</option><option value="C">Regu C / C班组</option><option value="R">Pendukung / 支持人员</option></select><span class="att-pending">Data Juli 2026 dimuat / 已载入2026年7月数据</span></div>
 <div class="att-table-wrap"><table><thead><tr><th>Bulan / Tahun<br/>月份 / 年份</th><th>Regu / 班组</th><th>Nama Karyawan / 员工姓名</th><th>Status Kehadiran / 出勤状态</th><th>Keterangan / 备注</th></tr></thead><tbody></tbody></table></div>
 </section>
-<section class="att-card">
-<h3>Persentase kehadiran bulanan setiap karyawan / 每位员工月出勤率</h3>
-<p class="att-sub">Persentase akan dihitung setelah data tersedia: jumlah hadir ÷ jumlah hari kerja yang dijadwalkan × 100%. Ketidakhadiran dan hari OFF akan mengikuti definisi pada data sumber yang Anda kirimkan. / 数据到齐后计算：出勤天数 ÷ 计划工作日 × 100%。缺勤及休息日将依据您提供的数据定义处理。</p>
-<div class="att-toolbar"><label for="attPercentMonth">Bulan rekap / 统计月份</label><select id="attPercentMonth"><option value="">Menunggu login / 登录后加载</option></select><span class="att-pending">Persentase Juli 2026 / 2026年7月出勤率</span></div>
-<div class="att-table-wrap"><table><thead><tr><th>Nama Karyawan / 员工姓名</th><th>Regu / 班组</th><th>Hari Kerja / 应出勤天数</th><th>Hadir / 出勤</th><th>Tidak Hadir / 缺勤</th><th>Persentase / 出勤率</th></tr></thead><tbody></tbody></table></div>
-</section>
+
 <section class="att-card">
 <h3>Perbandingan kehadiran setiap regu / 各班组出勤率对比</h3>
 <p class="att-sub">Diagram akan membandingkan persentase kehadiran Regu A, Regu B, Regu C, dan Pendukung berdasarkan bulan yang dipilih. / 图表将根据所选月份比较 A、B、C 班组及支持人员的出勤率。</p>
@@ -906,18 +901,12 @@ async function init(){
         attendanceSource[month]={label,records:[]};
       }
       const detail=r.details||{};
-      // Normalisasi satu format data absensi untuk semua tampilan.
-      // Data lama mungkin menyimpan jumlah hadir sebagai 'hadir', data baru sebagai 'present'.
-      const present=Number(detail.present ?? detail.hadir ?? detail.attended ?? 0);
-      const sick=Number(detail.sick ?? detail.sakit ?? 0);
-      const izin=Number(detail.izin ?? detail.leave ?? 0);
-      const mangkir=Number(detail.mangkir ?? detail.absent_days ?? 0);
       attendanceSource[month].records.push({
-        id:r.id, employeeId:r.employee_id,
         name:r.employee_name||'', group:detail.group||detail.team||employees.find(e=>e.name===r.employee_name)?.team||'',
-        absent:sick+izin+mangkir, sick, izin, mangkir,
-        total:25, workdays:25, present,
-        percent:Math.max(0,Math.min(100,present/25*100))
+        absent:Number(detail.absent)||0, sick:Number(detail.sick)||0, izin:Number(detail.izin)||0,
+        mangkir:Number(detail.mangkir)||0, total:Number(detail.total)||0,
+        workdays:Number(detail.workdays)||0, present:Number(detail.present)||0,
+        percent:Number(detail.percent)||0
       });
     });
     window.dispatchEvent(new CustomEvent('dashboard:data-loaded',{detail:{employees,attendanceSource}}));
@@ -1139,7 +1128,7 @@ function recordsFor(m){return (attendanceSource[m]||{records:[]}).records;}
    const existing=(window.__attendanceSource[month]?.records||[]);
    entryRows.innerHTML=emps.map(emp=>{
      const r=existing.find(x=>x.name===emp.name&&x.group===team)||{};
-     const hadir=Number(r.present ?? r.hadir ?? 0), sakit=Number(r.sick)||0, izin=Number(r.izin)||0, mangkir=Number(r.mangkir)||0;
+     const hadir=Number(r.present)||0, sakit=Number(r.sick)||0, izin=Number(r.izin)||0, mangkir=Number(r.mangkir)||0;
      const total=hadir+sakit+izin+mangkir;
      return `<tr data-employee-id="${entryEsc(emp.id)}" data-employee-name="${entryEsc(emp.name)}">
        <td>${entryEsc(emp.name)}</td>
@@ -1188,11 +1177,7 @@ function recordsFor(m){return (attendanceSource[m]||{records:[]}).records;}
        const m=r.attendance_month;if(!m)return;
        if(!rebuilt[m]){const d=new Date(m+'-01T00:00:00');rebuilt[m]={label:Number.isNaN(d.getTime())?m:d.toLocaleDateString('id-ID',{month:'long',year:'numeric'}),records:[]};}
        const d=r.details||{};
-       const present=Number(d.present ?? d.hadir ?? d.attended ?? 0);
-       const sick=Number(d.sick ?? d.sakit ?? 0);
-       const izin=Number(d.izin ?? d.leave ?? 0);
-       const mangkir=Number(d.mangkir ?? d.absent_days ?? 0);
-       rebuilt[m].records.push({id:r.id,employeeId:r.employee_id,name:r.employee_name||'',group:d.group||d.team||fresh.employees.find(e=>e.id===r.employee_id)?.team||'',absent:sick+izin+mangkir,sick,izin,mangkir,total:25,workdays:25,present,percent:Math.max(0,Math.min(100,present/25*100))});
+       rebuilt[m].records.push({name:r.employee_name||'',group:d.group||d.team||'',absent:Number(d.absent)||0,sick:Number(d.sick)||0,izin:Number(d.izin)||0,mangkir:Number(d.mangkir)||0,total:Number(d.total)||0,workdays:Number(d.workdays)||25,present:Number(d.present??d.hadir)||0,percent:Number(d.percent)||0});
      });
      window.__attendanceSource=rebuilt;
      window.dispatchEvent(new CustomEvent('dashboard:data-loaded',{detail:{employees:fresh.employees,attendanceSource:rebuilt}}));
