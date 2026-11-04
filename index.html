@@ -136,14 +136,6 @@ table{min-width:1600px}
 .login-submit{width:100%;margin-top:18px;border:1px solid #39869a;border-radius:10px;padding:12px;background:linear-gradient(120deg,#1a6677,#24528a);color:#fff;font-weight:850;font:inherit;cursor:pointer}
 .login-submit:disabled{opacity:.55;cursor:wait}.login-status{min-height:20px;margin-top:12px;color:#ffbf86;font-size:12px;line-height:1.5}.login-foot{margin-top:14px;color:#8299b2;font-size:10px;text-align:center}
 
-
-/* Navigasi sheet: semua menu terlihat tanpa scroll horizontal */
-.sheet-tabs{display:flex;flex-wrap:wrap;overflow-x:visible;overflow-y:visible;justify-content:space-between;gap:6px;padding:7px;scrollbar-width:none}
-.sheet-tabs::-webkit-scrollbar{display:none}
-.sheet-tab{flex:1 1 auto;justify-content:center;white-space:normal;min-width:max-content;padding:10px 12px}
-@media(max-width:900px){.sheet-tab{flex:1 1 calc(50% - 6px);min-width:0}}
-@media(max-width:520px){.sheet-tab{flex:1 1 100%;justify-content:flex-start}}
-
 </style>
 <style id="skill-card-ktp-redesign">
 /* Kartu skill bergaya kartu identitas (landscape) */
@@ -219,27 +211,6 @@ table{min-width:1600px}
 #s4PhotoLightbox .s4-lightbox-close{position:absolute;top:14px;right:18px;border:0;border-radius:50%;width:44px;height:44px;font-size:30px;line-height:1;background:#fff;color:#111;cursor:pointer}
 
 #s4PhotoLightbox .s4-lightbox-hint{position:absolute;bottom:12px;left:0;right:0;text-align:center;color:#fff;font-size:13px}
-</style>
-
-<style id="navigation-no-horizontal-scroll-fix">
-/* FIX FINAL: seluruh tab menu tampil tanpa scrollbar horizontal */
-nav.sheet-tabs, .sheet-tabs {
-  display:flex !important; flex-flow:row wrap !important;
-  align-items:stretch !important; justify-content:flex-start !important;
-  width:100% !important; max-width:100% !important;
-  overflow-x:hidden !important; overflow-y:visible !important;
-  scrollbar-width:none !important; white-space:normal !important;
-}
-nav.sheet-tabs::-webkit-scrollbar, .sheet-tabs::-webkit-scrollbar {display:none !important; width:0 !important; height:0 !important;}
-.sheet-tabs > .sheet-tab {
-  flex:1 1 190px !important; min-width:0 !important; max-width:100% !important;
-  white-space:normal !important; overflow-wrap:anywhere !important;
-  justify-content:center !important; text-align:center !important;
-}
-.sheet-tabs .tab-count {flex:0 0 auto !important;}
-@media(max-width:600px){
-  .sheet-tabs > .sheet-tab {flex:1 1 calc(50% - 6px) !important; padding:9px 7px !important; font-size:11px !important;}
-}
 </style>
 </head>
 <body>
@@ -371,7 +342,7 @@ nav.sheet-tabs::-webkit-scrollbar, .sheet-tabs::-webkit-scrollbar {display:none 
 <section class="s4-card" style="margin-top:18px"><h3 style="margin:0 0 6px">Perbandingan kesalahan setiap regu / 各班组错误对比</h3><p class="s4-small">Pilih bulan untuk melihat rekap pada bulan tersebut. Jumlah dihitung otomatis dari catatan yang dimasukkan. / 选择月份查看该月统计，数量根据录入记录自动计算。</p><div class="s4-actions" style="align-items:center"><label for="s4MonthFilter"><strong>Filter bulan / 月份筛选：</strong></label><select class="s4-btn" id="s4MonthFilter" style="background:#fff;border:1px solid #cbd5e1"><option value="">Semua bulan / 所有月份</option></select><span class="s4-btn primary" id="s4FilteredTotal" style="cursor:default">Total kesalahan: 0</span></div><div class="s4-chart" id="s4TeamChart"></div><h3 style="margin:20px 0 6px">Kesalahan setiap orang dalam regu / 各班组员工错误对比</h3><p class="s4-small">Pilih bulan untuk melihat kesalahan setiap orang pada bulan tersebut. / 选择月份查看该月每位员工的错误次数。</p><div class="s4-actions" style="align-items:center"><label for="s4PersonMonthFilter"><strong>Filter bulan per orang / 员工月份筛选：</strong></label><select class="s4-btn" id="s4PersonMonthFilter" style="background:#fff;border:1px solid #cbd5e1"><option value="">Semua bulan / 所有月份</option></select></div><div class="s4-person-list" id="s4PersonChart"></div></section></div>
 </div>
 <div aria-hidden="true" class="sheet-pane" id="sheet-attendance" role="tabpanel">
-<div class="sheet-heading"><div><h2>Kehadiran Karyawan / 员工考勤</h2><p>REKAP ABSENSI BULANAN / 月度考勤统计 — Nama, regu, hadir, sakit, izin, mangkir, dan persentase kehadiran. / 员工姓名、班组、病假、事假、旷工、缺勤合计及出勤率。</p></div><span class="sheet-tag">LEMBAR 5 / 工作表 5</span></div>
+<div class="sheet-heading"><div><h2>Kehadiran Karyawan / 员工考勤</h2><p>REKAP ABSENSI BULANAN / 月度考勤统计 — Nama, regu, hadir, sakit, izin, mangkir, dan persentase kehadiran. / 员工姓名、班组、病假、事假、旷工、缺勤合计及出勤率。</p></div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span class="sheet-tag">LEMBAR 5 / 工作表 5</span><button type="button" class="button" id="attOpenEntry">＋ Tambah Absensi / 添加考勤</button></div></div>
 <style>
       #sheet-attendance .att-card{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:18px;margin-bottom:16px;min-width:0}
       #sheet-attendance .att-card h3{font-size:15px;margin:0 0 5px}
@@ -396,6 +367,13 @@ nav.sheet-tabs::-webkit-scrollbar, .sheet-tabs::-webkit-scrollbar {display:none 
       #sheet-attendance .att-track{height:13px;background:#26374b;border-radius:99px;overflow:hidden}
       #sheet-attendance .att-track span{display:block;height:100%;width:0;background:linear-gradient(90deg,#55d6a2,#4bb8d5);border-radius:99px}
       #sheet-attendance .att-pending{display:inline-block;padding:5px 8px;border:1px dashed #4b6078;border-radius:7px;color:#91a6bd;font-size:10px}
+      #sheet-attendance .att-modal-backdrop{display:none;position:fixed;inset:0;z-index:1000;background:rgba(2,8,18,.82);padding:22px;overflow:auto;align-items:center;justify-content:center}
+      #sheet-attendance .att-modal-backdrop.open{display:flex}
+      #sheet-attendance .att-modal{width:min(1120px,100%);max-height:calc(100vh - 44px);overflow:auto;background:#111c2e;border:1px solid #38516d;border-radius:18px;padding:18px;box-shadow:0 24px 90px #0009}
+      #sheet-attendance .att-modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:12px}
+      #sheet-attendance .att-modal-close{border:1px solid #3b526d;background:#1c2c42;color:#eaf3ff;border-radius:9px;padding:8px 12px;cursor:pointer;font-weight:800}
+      #sheet-attendance .att-modal .att-card{margin:0}
+      @media(max-width:760px){#sheet-attendance .att-modal-backdrop{padding:8px}#sheet-attendance .att-modal{max-height:calc(100vh - 16px);padding:12px}}
       @media(max-width:760px){#sheet-attendance .att-chart-grid{grid-template-columns:1fr}#sheet-attendance .att-stats{grid-template-columns:1fr}#sheet-attendance .att-card{padding:12px}}
     </style>
 <div class="att-stats">
@@ -403,7 +381,7 @@ nav.sheet-tabs::-webkit-scrollbar, .sheet-tabs::-webkit-scrollbar {display:none 
 <div class="att-stat"><span>RATA-RATA KEHADIRAN BULANAN / 月平均出勤率</span><strong>97%</strong></div>
 <div class="att-stat"><span>BULAN DIPILIH / 当前月份</span><strong style="font-size:18px">Juli 2026</strong></div>
 </div>
-<section class="att-card" id="attManualPanel">
+<div class="att-modal-backdrop" id="attEntryModal" aria-hidden="true"><div class="att-modal" role="dialog" aria-modal="true" aria-labelledby="attEntryModalTitle"><div class="att-modal-head"><div><h3 id="attEntryModalTitle" style="margin:0 0 5px">Input absensi bulanan / 月度考勤录入</h3><p class="att-sub" style="margin:0">Formulir hanya muncul saat tombol Tambah Absensi ditekan. / 点击添加考勤后显示录入表单。</p></div><button type="button" class="att-modal-close" id="attCloseEntry" aria-label="Tutup formulir">✕ Tutup</button></div><section class="att-card" id="attManualPanel">
 <h3>Input absensi bulanan / 月度考勤录入</h3>
 <p class="att-sub">Pilih bulan dan regu, lalu isi jumlah hari Hadir, Sakit, Izin, dan Mangkir untuk setiap karyawan. Total harus 25 hari. / 选择月份和班组，填写每位员工的出勤、病假、事假及旷工天数，合计必须为25天。</p>
 <div class="att-toolbar">
@@ -414,7 +392,7 @@ nav.sheet-tabs::-webkit-scrollbar, .sheet-tabs::-webkit-scrollbar {display:none 
 </div>
 <div id="attEntryStatus" class="att-pending" role="status">Pilih bulan dan regu untuk mulai mengisi.</div>
 <div class="att-table-wrap" style="margin-top:12px"><table id="attEntryTable" style="min-width:850px"><thead><tr><th>Nama karyawan / 员工姓名</th><th>Hadir / 出勤</th><th>Sakit / 病假</th><th>Izin / 事假</th><th>Mangkir / 旷工</th><th>Total hari / 合计</th><th>Persentase / 出勤率</th></tr></thead><tbody id="attEntryRows"><tr><td class="att-empty" colspan="7">Menunggu data karyawan / 等待员工数据</td></tr></tbody></table></div>
-</section>
+</section></div></div>
 <section class="att-card">
 <h3>Daftar kehadiran karyawan / 员工考勤名单</h3>
 <p class="att-sub">Masukkan absensi setiap karyawan secara manual. Data tersimpan ke Supabase dan dapat diperbarui kapan saja. / 手动录入每位员工的考勤，数据保存至 Supabase，可随时修改。</p>
@@ -1063,6 +1041,13 @@ function recordsFor(m){return (attendanceSource[m]||{records:[]}).records;}
 
  // Input absensi manual bulanan: simpan per karyawan menggunakan upsert Supabase.
  const entryRows=$('attEntryRows'), entryStatus=$('attEntryStatus');
+ const entryModal=$('attEntryModal');
+ function openAttendanceEntry(){entryModal?.classList.add('open');entryModal?.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';}
+ function closeAttendanceEntry(){entryModal?.classList.remove('open');entryModal?.setAttribute('aria-hidden','true');document.body.style.overflow='';}
+ $('attOpenEntry')?.addEventListener('click',openAttendanceEntry);
+ $('attCloseEntry')?.addEventListener('click',closeAttendanceEntry);
+ entryModal?.addEventListener('click',e=>{if(e.target===entryModal)closeAttendanceEntry();});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&entryModal?.classList.contains('open'))closeAttendanceEntry();});
  const entryEsc=esc;
  const getEntryEmployees=()=>{
    const selected=$('attEntryTeam').value;
@@ -1141,6 +1126,7 @@ function recordsFor(m){return (attendanceSource[m]||{records:[]}).records;}
      window.dispatchEvent(new CustomEvent('dashboard:data-loaded',{detail:{employees:fresh.employees,attendanceSource:rebuilt}}));
      entryStatus.textContent=`Berhasil menyimpan ${payload.length} karyawan untuk ${month}. / 已成功保存${payload.length}名员工的${month}考勤。`;
      drawEntryRows();
+     closeAttendanceEntry();
    }catch(err){console.error(err);entryStatus.textContent='Gagal menyimpan: '+(err.message||String(err));}
    finally{btn.disabled=false;btn.textContent='Simpan absensi / 保存考勤';}
  });
