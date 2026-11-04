@@ -212,6 +212,52 @@ table{min-width:1600px}
 
 #s4PhotoLightbox .s4-lightbox-hint{position:absolute;bottom:12px;left:0;right:0;text-align:center;color:#fff;font-size:13px}
 </style>
+
+<style id="navigation-no-scroll-final-v2">
+/* Navigasi utama: semua menu membungkus ke baris berikutnya, tanpa geser horizontal */
+nav.sheet-tabs[role="tablist"], .wrap nav.sheet-tabs, .sheet-tabs {
+  display:flex !important;
+  flex-flow:row wrap !important;
+  align-items:stretch !important;
+  justify-content:space-between !important;
+  gap:6px !important;
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  box-sizing:border-box !important;
+  overflow-x:hidden !important;
+  overflow-y:visible !important;
+  white-space:normal !important;
+  scrollbar-width:none !important;
+}
+nav.sheet-tabs[role="tablist"]::-webkit-scrollbar, .sheet-tabs::-webkit-scrollbar {
+  display:none !important; width:0 !important; height:0 !important;
+}
+nav.sheet-tabs[role="tablist"] > .sheet-tab, .sheet-tabs > .sheet-tab {
+  flex:1 1 185px !important;
+  min-width:0 !important;
+  max-width:100% !important;
+  box-sizing:border-box !important;
+  white-space:normal !important;
+  overflow-wrap:anywhere !important;
+  word-break:normal !important;
+  justify-content:center !important;
+  text-align:center !important;
+}
+@media (max-width:700px) {
+  nav.sheet-tabs[role="tablist"] > .sheet-tab, .sheet-tabs > .sheet-tab {
+    flex:1 1 calc(50% - 6px) !important;
+    padding:9px 7px !important;
+    font-size:11px !important;
+  }
+}
+@media (max-width:420px) {
+  nav.sheet-tabs[role="tablist"] > .sheet-tab, .sheet-tabs > .sheet-tab {
+    flex:1 1 100% !important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div aria-labelledby="loginTitle" aria-modal="true" id="loginGate" role="dialog">
