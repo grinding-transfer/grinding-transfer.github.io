@@ -757,7 +757,7 @@ function renderOrgChart(){
   const esc=(v)=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const find=(name)=>employees.find(e=>e.name.toUpperCase()===name.toUpperCase());
   const photo=(e)=>e&&e.photo?`<img src="${e.photo}" alt="Foto ${esc(e.name)}" loading="lazy">`:'';
-  const node=(e,name,role,meta='',cls='')=>`<article class="org-node ${cls}"><div class="org-node-main">${photo(e)}<div><div class="org-name">${esc(name)}</div><div class="org-role">${esc(role)}</div>${meta?`<div class="org-meta">${esc(meta)}</div>`:''}</div></div>${cls==='china'?'<div class="org-band">班长 · PEMIMPIN</div>':cls==='foreman'?'<div class="org-band">FOREMAN / 班组负责人</div>':''}</article>`;
+  const node=(e,name,role,meta='',cls='')=>`<article class="org-node ${cls}"><div class="org-node-main">${photo(e)}<div><div class="org-name">${esc(name)}</div><div class="org-role">${esc(role)}</div>${meta?`<div class="org-meta">${esc(meta)}</div>`:''}</div></div>${cls==='china'?'<div class="org-band">班长 · PEMIMPIN</div>':cls==='foreman'?'<div class="org-band">班长</div>':''}</article>`;
   const leaderNames={A:'MASRI',B:'MUHAMMAD ALFANDI',C:'ACANG'};
   const teamLabels={A:['REGU A / 甲班','班组 A'],B:['REGU B / 乙班','班组 B'],C:['REGU C / 丙班','班组 C']};
   const teamMarkup=['A','B','C'].map(t=>{
@@ -769,10 +769,10 @@ function renderOrgChart(){
   const herman=find('HERMAN SAPUTRA');
   const aswar=find('ASWAR');
   const admin=find('LAODE YAKUB VAKAD MUHADAR');
-  const support=`<div class="org-support-grid"><div class="org-node support"><div class="org-node-main">${photo(aswar)}<div><div class="org-name">ASWAR</div><div class="org-role">Wakil Pemimpin / 副负责人</div><div class="org-meta">WAKIL FOREMAN  / 副班长</div></div></div></div><div class="org-node support"><div class="org-node-main">${photo(admin)}<div><div class="org-name">LAODE YAKUB VAKAD MUHADAR</div><div class="org-role">Admin Statistik / 数据统计管理员</div><div class="org-meta">Input Data / 数据录入</div></div></div></div></div>`;
+  const support=`<div class="org-support-grid"><div class="org-node support"><div class="org-node-main">${photo(aswar)}<div><div class="org-name">ASWAR</div><div class="org-role">Wakil Pemimpin /副班长</div><div class="org-meta">WAKIL FOREMAN  / 副班长</div></div></div></div><div class="org-node support"><div class="org-node-main">${photo(admin)}<div><div class="org-name">LAODE YAKUB VAKAD MUHADAR</div><div class="org-role">Admin Statistik / 数据统计管理员</div><div class="org-meta">Input Data / 数据录入</div></div></div></div></div>`;
   const overviewHost=document.getElementById('orgChartOverview');
   if(!overviewHost)return;
-  const markup=`<div class="org-top">${node(china,'张锋','班长 · Pemimpin dari Tiongkok','118041304','china')}<div class="org-connector"></div>${node(herman,'HERMAN SAPUTRA','Pemimpin Karyawan Indonesia','Foreman / 班组负责人','foreman')}<div class="org-connector"></div>${support}<div class="org-team-connector"></div></div><div class="org-teams">${teamMarkup}</div>`;
+  const markup=`<div class="org-top">${node(china,'张锋','班长 · Pemimpin dari Tiongkok','118041304','china')}<div class="org-connector"></div>${node(herman,'HERMAN SAPUTRA','Pemimpin Karyawan Indonesia','班长','foreman')}<div class="org-connector"></div>${support}<div class="org-team-connector"></div></div><div class="org-teams">${teamMarkup}</div>`;
   overviewHost.innerHTML=markup;
 }
 
