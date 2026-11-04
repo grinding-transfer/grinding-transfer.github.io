@@ -622,7 +622,7 @@ const employees = []; const EMBEDDED_EMPLOYEE_DATA = []; // Data karyawan dimuat
 const offSchedule = {dates:[],employees:[]};
 const teamLabel={A:"Regu A / A班组",B:"Regu B / B班组",C:"Regu C / C班组",Pendukung:"Pendukung / 支持人员","Belum ditentukan":"Belum ditentukan / 未指定"};
 const skillLabel={"Baja Lebar":"MESIN BAJA LEBAR / 板坯修磨机","Baja Balok":"MESIN BAJA BALOK / 方坯修磨机","Baja Bulat":"MESIN BAJA BULAT / 圆坯修磨机"};
-const roleLabel={"Anggota":"Anggota / 班组成员","Pemimpin Regu A":"Pemimpin Regu A / A班组长","Pemimpin Regu B":"Pemimpin Regu B / B班组长","Pemimpin Regu C":"Pemimpin Regu C / C班组长","Wakil Foreman Reguler":"Wakil Foreman Reguler / 常白班副班长","Input Data":"Petugas Input Data / 数据录入员","Foreman":"Foreman / 班长"};
+const roleLabel={"Anggota":"Anggota / 班组成员","Pemimpin Regu A":"WAKIL FOREMAN A / A班副班长","Pemimpin Regu B":"Pemimpin Regu B / B班组长","Pemimpin Regu C":"Pemimpin Regu C / C班组长","Wakil Foreman Reguler":"Wakil Foreman Reguler / 常白班副班长","Input Data":"Petugas Input Data / 数据录入员","Foreman":"Foreman / 班长"};
 const keys=["Baja Lebar","Baja Balok","Baja Bulat"];
 const $=id=>document.getElementById(id);
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
