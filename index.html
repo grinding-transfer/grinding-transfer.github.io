@@ -622,7 +622,7 @@ const employees = []; const EMBEDDED_EMPLOYEE_DATA = []; // Data karyawan dimuat
 const offSchedule = {dates:[],employees:[]};
 const teamLabel={A:"Regu A / A班组",B:"Regu B / B班组",C:"Regu C / C班组",Pendukung:"Pendukung / 支持人员","Belum ditentukan":"Belum ditentukan / 未指定"};
 const skillLabel={"Baja Lebar":"MESIN BAJA LEBAR / 板坯修磨机","Baja Balok":"MESIN BAJA BALOK / 方坯修磨机","Baja Bulat":"MESIN BAJA BULAT / 圆坯修磨机"};
-const roleLabel={"Anggota":"Anggota / 班组成员","Pemimpin Regu A":"WAKIL FOREMAN A / A班副班长","Pemimpin Regu B":"Pemimpin Regu B / B班组长","Pemimpin Regu C":"Pemimpin Regu C / C班组长","Wakil Foreman Reguler":"Wakil Foreman Reguler / 常白班副班长","Input Data":"Petugas Input Data / 数据录入员","Foreman":"Foreman / 班长"};
+const roleLabel={"Anggota":"Anggota / 班组成员","WAKIL FOREMANA":"WAKIL FOREMAN A / A班副班长","WAKIL FOREMANB":"WAKIL FOREMANB / B班组长","WAKIL FOREMANC":"WAKIL FOREMANC / C班组长","Wakil Foreman Reguler":"Wakil Foreman Reguler / 常白班副班长","Input Data":"Petugas Input Data / 数据录入员","Foreman":"Foreman / 班长"};
 const keys=["Baja Lebar","Baja Balok","Baja Bulat"];
 const $=id=>document.getElementById(id);
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
@@ -763,7 +763,7 @@ function renderOrgChart(){
   const teamMarkup=['A','B','C'].map(t=>{
     const leader=find(leaderNames[t]);
     const members=employees.filter(e=>e.team===t&&e.name.toUpperCase()!==leaderNames[t]);
-    return `<section class="org-team"><div class="org-team-head"><div class="team-title">${teamLabels[t][0]}</div><div class="team-sub">${teamLabels[t][1]}</div><span class="org-count">${members.length+(leader?1:0)} personel / 人</span></div>${leader?`<div class="org-leader">${node(leader,leader.name,'Pemimpin Regu '+t+' / '+t+'班组长',leader.job||'','')}</div>`:`<div class="org-leader"><article class="org-node"><div class="org-name">Pemimpin belum ditentukan / 班组长待定</div></article></div>`}<div class="org-members">${members.map(e=>`<article class="org-member">${photo(e)}<div><div class="member-name">${esc(e.name)}</div><div class="member-job">${esc(e.job||'Anggota / 成员')}</div></div></article>`).join('')}</div></section>`;
+    return `<section class="org-team"><div class="org-team-head"><div class="team-title">${teamLabels[t][0]}</div><div class="team-sub">${teamLabels[t][1]}</div><span class="org-count">${members.length+(leader?1:0)} personel / 人</span></div>${leader?`<div class="org-leader">${node(leader,leader.name,'WAKIL FOREMAN'+t+' / '+t+'班组长',leader.job||'','')}</div>`:`<div class="org-leader"><article class="org-node"><div class="org-name">Pemimpin belum ditentukan / 班组长待定</div></article></div>`}<div class="org-members">${members.map(e=>`<article class="org-member">${photo(e)}<div><div class="member-name">${esc(e.name)}</div><div class="member-job">${esc(e.job||'Anggota / 成员')}</div></div></article>`).join('')}</div></section>`;
   }).join('');
   const china=find('张锋');
   const herman=find('HERMAN SAPUTRA');
