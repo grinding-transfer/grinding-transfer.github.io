@@ -529,6 +529,13 @@ nav.sheet-tabs[role="tablist"] > .sheet-tab {
 <div class="sheet-heading"><div><h2>Sanksi Karyawan / 员工处罚</h2><p>Catat pelanggaran dan sanksi karyawan secara mandiri. / 自行登记员工违规情况及处罚。</p></div><span class="sheet-tag">LEMBAR 6 / 工作表 6</span></div>
 <style>
   #sheet-sanctions .san-card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px}
+  #sheet-sanctions .san-toolbar{margin-bottom:14px}
+  #sheet-sanctions .san-modal-backdrop{display:none;position:fixed;inset:0;z-index:1100;background:rgba(2,8,18,.82);padding:22px;overflow:auto;align-items:center;justify-content:center}
+  #sheet-sanctions .san-modal-backdrop.open{display:flex}
+  #sheet-sanctions .san-modal{width:min(1000px,100%);max-height:calc(100vh - 44px);overflow:auto;background:#111c2e;border:1px solid #38516d;border-radius:18px;padding:18px;box-shadow:0 24px 90px #0009}
+  #sheet-sanctions .san-modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:12px}
+  #sheet-sanctions .san-modal-close{border:1px solid #3b526d;background:#1c2c42;color:#eaf3ff;border-radius:9px;padding:8px 12px;cursor:pointer;font-weight:800}
+  @media(max-width:700px){#sheet-sanctions .san-modal-backdrop{padding:8px}#sheet-sanctions .san-modal{max-height:calc(100vh - 16px);padding:12px}}
   #sheet-sanctions .san-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
   #sheet-sanctions label{display:block;color:var(--muted);font-size:12px;font-weight:750;margin-bottom:6px}
   #sheet-sanctions input,#sheet-sanctions select,#sheet-sanctions textarea{width:100%;background:#0b1626;color:var(--text);border:1px solid #31435b;border-radius:9px;padding:10px;font:inherit;min-width:0}
@@ -552,8 +559,16 @@ nav.sheet-tabs[role="tablist"] > .sheet-tab {
 /* Sembunyikan angka badge pada navigasi utama; label menu tetap tampil. */
 .sheet-tabs .sheet-tab .tab-count{display:none!important}
 </style>
-<section class="san-card">
-<h3 style="margin:0 0 14px">Input Data Sanksi / 处罚登记</h3>
+<div class="san-toolbar" style="display:flex;justify-content:flex-end;align-items:center;gap:10px;margin:0 0 14px">
+<button class="san-btn primary" id="sanOpenForm" type="button" aria-expanded="false" aria-controls="sanFormPanel">＋ Tambah Sanksi / 添加处罚</button>
+</div>
+<div class="san-modal-backdrop" id="sanFormModal" aria-hidden="true">
+<div class="san-modal" role="dialog" aria-modal="true" aria-labelledby="sanFormTitle">
+<div class="san-modal-head">
+<div><h3 id="sanFormTitle" style="margin:0 0 5px">Input Data Sanksi / 处罚登记</h3><p style="margin:0;color:var(--muted);font-size:12px">Formulir hanya muncul setelah tombol Tambah Sanksi diklik. / 点击添加处罚后显示录入表单。</p></div>
+<button class="san-modal-close" id="sanCloseForm" type="button">✕ Tutup / 关闭</button>
+</div>
+<section class="san-card" id="sanFormPanel">
 <form id="sanctionForm">
 <div class="san-form">
 <div><label for="sanDate">Tanggal / 日期</label><input id="sanDate" required="" type="date"/></div>
@@ -567,6 +582,8 @@ nav.sheet-tabs[role="tablist"] > .sheet-tab {
 <p style="font-size:11px;color:var(--muted);margin:10px 0 0">Data disimpan di browser/perangkat ini. / 数据保存在此浏览器/设备中。</p>
 </form>
 </section>
+</div>
+</div>
 <section class="san-kpis">
 <div class="san-kpi"><span>Total catatan sanksi / 处罚记录总数</span><b id="sanTotal">0</b></div>
 <div class="san-kpi"><span>Total potong poin / 扣分总计</span><b id="sanPointTotal">0</b></div>
@@ -599,6 +616,14 @@ nameSelect.addEventListener('change',syncTeam);
 typeSelect.addEventListener('change',()=>{const isPoints=typeSelect.value==='POTONG POIN';pointsSelect.disabled=!isPoints;pointsSelect.required=isPoints;if(!isPoints)pointsSelect.value='';});
 pointsSelect.disabled=true;
 document.getElementById('sanDate').value=new Date().toISOString().slice(0,10);
+const sanFormModal=document.getElementById('sanFormModal');
+const sanOpenForm=document.getElementById('sanOpenForm');
+const sanCloseForm=document.getElementById('sanCloseForm');
+function setSanFormOpen(open){sanFormModal.classList.toggle('open',open);sanFormModal.setAttribute('aria-hidden',String(!open));sanOpenForm.setAttribute('aria-expanded',String(open));document.body.style.overflow=open?'hidden':'';if(open){if(!document.getElementById('sanDate').value)document.getElementById('sanDate').value=new Date().toISOString().slice(0,10);setTimeout(()=>nameSelect.focus(),50)}else{sanOpenForm.focus()}}
+sanOpenForm.addEventListener('click',()=>setSanFormOpen(true));
+sanCloseForm.addEventListener('click',()=>setSanFormOpen(false));
+sanFormModal.addEventListener('click',e=>{if(e.target===sanFormModal)setSanFormOpen(false)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&sanFormModal.classList.contains('open'))setSanFormOpen(false)});
 function save(){try{localStorage.setItem('grindingTransferSanctionsV2',JSON.stringify(records))}catch(e){alert('Penyimpanan browser penuh / 浏览器存储空间不足')}}
 function bars(el,items,total){el.innerHTML=items.length?items.map(x=>`<div class="san-bar-row"><span>${esc(x.label)}</span><div class="san-track"><div class="san-fill" style="width:${total?Math.max(0,Math.min(100,x.count/total*100)):0}%"></div></div><b>${total?(x.count/total*100).toFixed(1):'0.0'}%</b></div>`).join(''):'<p style="color:var(--muted)">Belum ada data / 暂无数据</p>'}
 function render(){
@@ -613,7 +638,7 @@ root.querySelectorAll('[data-san-delete]').forEach(b=>b.addEventListener('click'
 document.getElementById('sanctionTabCount').textContent=String(records.length).padStart(2,'0');
 }
 document.getElementById('sanctionForm').addEventListener('submit',e=>{e.preventDefault();if(!nameSelect.value||!teamSelect.value||!document.getElementById('sanDate').value||!document.getElementById('sanError').value.trim()||!typeSelect.value||(typeSelect.value==='POTONG POIN'&&!pointsSelect.value)){alert('Lengkapi semua kolom wajib / 请填写所有必填项');return}
-records.unshift({date:document.getElementById('sanDate').value,name:nameSelect.value,team:teamSelect.value,error:document.getElementById('sanError').value.trim(),type:typeSelect.value,points:typeSelect.value==='POTONG POIN'?Number(pointsSelect.value):0});save();render();document.getElementById('sanError').value='';typeSelect.value='';pointsSelect.value='';pointsSelect.disabled=true;pointsSelect.required=false;});
+records.unshift({date:document.getElementById('sanDate').value,name:nameSelect.value,team:teamSelect.value,error:document.getElementById('sanError').value.trim(),type:typeSelect.value,points:typeSelect.value==='POTONG POIN'?Number(pointsSelect.value):0});save();render();document.getElementById('sanctionForm').reset();document.getElementById('sanDate').value=new Date().toISOString().slice(0,10);pointsSelect.disabled=true;pointsSelect.required=false;teamSelect.value='';setSanFormOpen(false);alert('Data sanksi berhasil disimpan / 处罚记录已保存');});
 document.getElementById('sanReset').addEventListener('click',()=>{document.getElementById('sanctionForm').reset();document.getElementById('sanDate').value=new Date().toISOString().slice(0,10);pointsSelect.disabled=true;pointsSelect.required=false;teamSelect.value=''});
 document.getElementById('sanExport').addEventListener('click',()=>{const header=['Tanggal / 日期','Nama / 姓名','Regu / 班组','Kesalahan / 违规事项','Sanksi / 处罚','Potong Poin / 扣分'];const csv=[header,...records.map(r=>[r.date,r.name,teamName[r.team]||r.team,r.error,sanctionName[r.type]||r.type,r.type==='POTONG POIN'?r.points:' '])].map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='data_sanksi_karyawan.csv';a.click();URL.revokeObjectURL(a.href)});
 render();
