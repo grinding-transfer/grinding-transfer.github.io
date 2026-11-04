@@ -772,7 +772,7 @@ function renderOrgChart(){
   const support=`<div class="org-support-grid"><div class="org-node support"><div class="org-node-main">${photo(aswar)}<div><div class="org-name">ASWAR</div><div class="org-role">Wakil Pemimpin /副班长</div><div class="org-meta">WAKIL FOREMAN  / 副班长</div></div></div></div><div class="org-node support"><div class="org-node-main">${photo(admin)}<div><div class="org-name">LAODE YAKUB VAKAD MUHADAR</div><div class="org-role">Admin Statistik / 数据统计管理员</div><div class="org-meta">Input Data / 数据录入</div></div></div></div></div>`;
   const overviewHost=document.getElementById('orgChartOverview');
   if(!overviewHost)return;
-  const markup=`<div class="org-top">${node(china,'张锋','班长 · Pemimpin dari Tiongkok','118041304','china')}<div class="org-connector"></div>${node(herman,'HERMAN SAPUTRA','Pemimpin Karyawan Indonesia','班长','foreman')}<div class="org-connector"></div>${support}<div class="org-team-connector"></div></div><div class="org-teams">${teamMarkup}</div>`;
+  const markup=`<div class="org-top">${node(china,'张锋','班长 · Pemimpin dari Tiongkok','118041304','china')}<div class="org-connector"></div>${node(herman,'HERMAN SAPUTRA','FOREMAN','班长','foreman')}<div class="org-connector"></div>${support}<div class="org-team-connector"></div></div><div class="org-teams">${teamMarkup}</div>`;
   overviewHost.innerHTML=markup;
 }
 
