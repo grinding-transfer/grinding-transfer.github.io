@@ -489,7 +489,10 @@ table{min-width:1600px}
   #sheet-sanctions .san-track{height:12px;background:#26364b;border-radius:20px;overflow:hidden}
   #sheet-sanctions .san-fill{height:100%;background:linear-gradient(90deg,#ffc66d,#ff7b88);border-radius:20px}
   @media(max-width:700px){#sheet-sanctions .san-form{grid-template-columns:1fr 1fr}#sheet-sanctions .san-kpis{grid-template-columns:1fr}#sheet-sanctions .san-bar-row{grid-template-columns:100px 1fr 42px}}
-  </style>
+  
+/* Sembunyikan angka badge pada navigasi utama; label menu tetap tampil. */
+.sheet-tabs .sheet-tab .tab-count{display:none!important}
+</style>
 <section class="san-card">
 <h3 style="margin:0 0 14px">Input Data Sanksi / 处罚登记</h3>
 <form id="sanctionForm">
