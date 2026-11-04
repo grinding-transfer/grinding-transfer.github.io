@@ -199,8 +199,8 @@ table{min-width:1600px}
 
 </style>
 <style id="premium-3d-steel-machine-visuals">
-.skill-machine-thumb{height:76px;min-height:76px;border-radius:14px;background:radial-gradient(ellipse at 50% 0%,#1e5274 0%,#102b45 62%,#0a1b2d 100%);border:1px solid #4a86a8;box-shadow:inset 0 1px 0 #ffffff20,0 7px 16px #07182a30;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:2px}
-.machine-steel-art{display:block;width:100%;height:100%;filter:drop-shadow(0 5px 4px #020b16a8)}
+.skill-machine-thumb{height:76px;min-height:76px;width:100%;box-sizing:border-box;border-radius:14px;background:radial-gradient(ellipse at 50% 0%,#245b7d 0%,#102b45 62%,#091b2c 100%);border:1px solid #5794b5;box-shadow:inset 0 1px 0 #ffffff28,0 7px 16px #07182a30;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:0}
+.machine-steel-art{display:block;width:100%;height:100%;max-width:none;flex:1 1 auto;filter:drop-shadow(0 5px 4px #020b16a8)}
 @media(max-width:760px){.skill-machine-thumb{height:66px;min-height:66px}}
 </style>
 <style>
@@ -656,12 +656,17 @@ function renderEmployeeSkillCards(selectedName=null,targetId="employeeSkillCards
  if(!list.length){host.innerHTML='<div class="skill-card-empty">Belum ada data skill untuk pilihan ini / 此筛选条件下暂无技能数据</div>';return;}
  const levelInfo={1:{name:'Dalam Pelatihan / 培训中',desc:'Belum mahir, perlu pelatihan',cn:'不熟练，需要培训',pct:25,color:'#8fa5bb'},2:{name:'Kompeten / 胜任',desc:'Bisa menyelesaikan dengan pendampingan',cn:'在他人指导下能完成工作',pct:50,color:'#ffc21c'},3:{name:'Ahli / 熟练',desc:'Bisa mengoperasikan secara mandiri',cn:'能够独立操作设备',pct:75,color:'#19a5ff'},4:{name:'Master / 大师',desc:'Bisa mengajar orang lain',cn:'能够培训和指导他人',pct:100,color:'#00bd83'}};
  const machineVisual=(k)=>{
-  const common=`<defs><linearGradient id="steelTop" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f7fcff"/><stop offset=".28" stop-color="#a9c6d8"/><stop offset=".58" stop-color="#eaf5fb"/><stop offset="1" stop-color="#6d8fa8"/></linearGradient><linearGradient id="steelSide" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#7897ad"/><stop offset="1" stop-color="#263f55"/></linearGradient><linearGradient id="steelFace" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#dcecf5"/><stop offset="1" stop-color="#58758c"/></linearGradient></defs>`;
+  const defs=`<defs>
+   <linearGradient id="steelTop-${k.replace(' ','')}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f8fdff"/><stop offset=".22" stop-color="#b9d3e3"/><stop offset=".48" stop-color="#f4fbff"/><stop offset=".76" stop-color="#8ba9bd"/><stop offset="1" stop-color="#dcecf5"/></linearGradient>
+   <linearGradient id="steelFront-${k.replace(' ','')}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a9c6d8"/><stop offset="1" stop-color="#55758d"/></linearGradient>
+   <linearGradient id="steelSide-${k.replace(' ','')}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6f91a8"/><stop offset="1" stop-color="#29465c"/></linearGradient>
+   <linearGradient id="steelRound-${k.replace(' ','')}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#29485f"/><stop offset=".22" stop-color="#c3dbe9"/><stop offset=".48" stop-color="#f8fdff"/><stop offset=".72" stop-color="#91aec1"/><stop offset="1" stop-color="#304e65"/></linearGradient>
+  </defs>`;
   let shape='';
-  if(k==='Baja Lebar') shape=`<path d="M18 43 49 23 114 23 83 43Z" fill="url(#steelTop)"/><path d="M18 43 83 43 83 67 18 67Z" fill="url(#steelFace)"/><path d="M83 43 114 23 114 47 83 67Z" fill="url(#steelSide)"/><path d="M24 46 78 46" stroke="#fff" stroke-opacity=".65" stroke-width="1.5"/>`;
-  else if(k==='Baja Balok') shape=`<path d="M28 39 57 21 105 21 76 39Z" fill="url(#steelTop)"/><path d="M28 39 76 39 76 72 28 72Z" fill="url(#steelFace)"/><path d="M76 39 105 21 105 54 76 72Z" fill="url(#steelSide)"/><path d="M34 43 70 43" stroke="#fff" stroke-opacity=".65" stroke-width="1.5"/>`;
-  else shape=`<ellipse cx="70" cy="31" rx="31" ry="14" fill="#e7f4fb"/><path d="M39 31v31c0 8 14 14 31 14s31-6 31-14V31" fill="url(#steelSide)"/><ellipse cx="70" cy="31" rx="31" ry="14" fill="url(#steelTop)" stroke="#f4fbff" stroke-width="1.5"/><path d="M43 34v25" stroke="#fff" stroke-opacity=".55" stroke-width="2"/><path d="M70 18c17 0 31 6 31 13" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width="2"/>`;
-  return `<svg class="machine-steel-art" viewBox="0 0 132 92" focusable="false" aria-hidden="true">${common}<ellipse cx="68" cy="77" rx="48" ry="5" fill="#061b2b" opacity=".34"/>${shape}</svg>`;
+  if(k==='Baja Lebar') shape=`<ellipse cx="180" cy="64" rx="116" ry="5" fill="#020d18" opacity=".42"/><path d="M62 37 105 13 302 13 259 37Z" fill="url(#steelTop-${k.replace(' ','')})"/><path d="M62 37 259 37 259 57 62 57Z" fill="url(#steelFront-${k.replace(' ','')})"/><path d="M259 37 302 13 302 33 259 57Z" fill="url(#steelSide-${k.replace(' ','')})"/><path d="M75 39 246 39" stroke="#fff" stroke-opacity=".65" stroke-width="1.5"/><path d="M105 15 294 15" stroke="#fff" stroke-opacity=".55" stroke-width="1.3"/>`;
+  else if(k==='Baja Balok') shape=`<ellipse cx="180" cy="65" rx="78" ry="5" fill="#020d18" opacity=".42"/><path d="M111 34 150 10 248 10 209 34Z" fill="url(#steelTop-${k.replace(' ','')})"/><path d="M111 34 209 34 209 61 111 61Z" fill="url(#steelFront-${k.replace(' ','')})"/><path d="M209 34 248 10 248 37 209 61Z" fill="url(#steelSide-${k.replace(' ','')})"/><path d="M121 37 199 37" stroke="#fff" stroke-opacity=".65" stroke-width="1.5"/>`;
+  else shape=`<ellipse cx="180" cy="65" rx="65" ry="5" fill="#020d18" opacity=".42"/><path d="M122 25v25c0 12 26 21 58 21s58-9 58-21V25" fill="url(#steelRound-${k.replace(' ','')})"/><ellipse cx="180" cy="25" rx="58" ry="17" fill="url(#steelTop-${k.replace(' ','')})" stroke="#f5fcff" stroke-width="2"/><path d="M127 29v19" stroke="#fff" stroke-opacity=".6" stroke-width="2"/><path d="M180 10c32 0 58 7 58 15" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="2"/>`;
+  return `<svg class="machine-steel-art" viewBox="0 0 360 76" preserveAspectRatio="xMidYMid meet" focusable="false" aria-hidden="true">${defs}${shape}</svg>`;
  };
  const levelFor=(e,k)=>e.skillLevels?.[k];
  host.innerHTML=list.map(e=>{
