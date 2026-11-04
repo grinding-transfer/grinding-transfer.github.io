@@ -198,6 +198,11 @@ table{min-width:1600px}
 @media(max-width:760px){.employee-skill-cards{grid-template-columns:minmax(0,1fr);gap:15px}.skill-card-top{grid-template-columns:82px minmax(0,1fr);padding:15px;gap:12px}.skill-portrait{width:82px;height:100px}.skill-team-badge{grid-column:2;justify-self:start;margin-top:-3px}.skill-profile-name{font-size:18px}.skill-machine-row{grid-template-columns:64px minmax(0,1fr);padding:12px}.skill-machine-thumb{height:66px}}
 
 </style>
+<style id="premium-3d-steel-machine-visuals">
+.skill-machine-thumb{height:76px;min-height:76px;border-radius:14px;background:radial-gradient(ellipse at 50% 0%,#1e5274 0%,#102b45 62%,#0a1b2d 100%);border:1px solid #4a86a8;box-shadow:inset 0 1px 0 #ffffff20,0 7px 16px #07182a30;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:2px}
+.machine-steel-art{display:block;width:100%;height:100%;filter:drop-shadow(0 5px 4px #020b16a8)}
+@media(max-width:760px){.skill-machine-thumb{height:66px;min-height:66px}}
+</style>
 <style>
 
 
@@ -650,7 +655,14 @@ function renderEmployeeSkillCards(selectedName=null,targetId="employeeSkillCards
  const list=(selectedName?employees.filter(e=>e.name===selectedName):employees.filter(e=>(filter==="all"||e.team===filter))).sort((a,b)=>{const order={A:1,B:2,C:3,Reguler:4};return (order[a.team]||9)-(order[b.team]||9)||a.name.localeCompare(b.name);});
  if(!list.length){host.innerHTML='<div class="skill-card-empty">Belum ada data skill untuk pilihan ini / 此筛选条件下暂无技能数据</div>';return;}
  const levelInfo={1:{name:'Dalam Pelatihan / 培训中',desc:'Belum mahir, perlu pelatihan',cn:'不熟练，需要培训',pct:25,color:'#8fa5bb'},2:{name:'Kompeten / 胜任',desc:'Bisa menyelesaikan dengan pendampingan',cn:'在他人指导下能完成工作',pct:50,color:'#ffc21c'},3:{name:'Ahli / 熟练',desc:'Bisa mengoperasikan secara mandiri',cn:'能够独立操作设备',pct:75,color:'#19a5ff'},4:{name:'Master / 大师',desc:'Bisa mengajar orang lain',cn:'能够培训和指导他人',pct:100,color:'#00bd83'}};
- const machineIcon={'Baja Lebar':'▰','Baja Balok':'▱','Baja Bulat':'◉'};
+ const machineVisual=(k)=>{
+  const common=`<defs><linearGradient id="steelTop" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f7fcff"/><stop offset=".28" stop-color="#a9c6d8"/><stop offset=".58" stop-color="#eaf5fb"/><stop offset="1" stop-color="#6d8fa8"/></linearGradient><linearGradient id="steelSide" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#7897ad"/><stop offset="1" stop-color="#263f55"/></linearGradient><linearGradient id="steelFace" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#dcecf5"/><stop offset="1" stop-color="#58758c"/></linearGradient></defs>`;
+  let shape='';
+  if(k==='Baja Lebar') shape=`<path d="M18 43 49 23 114 23 83 43Z" fill="url(#steelTop)"/><path d="M18 43 83 43 83 67 18 67Z" fill="url(#steelFace)"/><path d="M83 43 114 23 114 47 83 67Z" fill="url(#steelSide)"/><path d="M24 46 78 46" stroke="#fff" stroke-opacity=".65" stroke-width="1.5"/>`;
+  else if(k==='Baja Balok') shape=`<path d="M28 39 57 21 105 21 76 39Z" fill="url(#steelTop)"/><path d="M28 39 76 39 76 72 28 72Z" fill="url(#steelFace)"/><path d="M76 39 105 21 105 54 76 72Z" fill="url(#steelSide)"/><path d="M34 43 70 43" stroke="#fff" stroke-opacity=".65" stroke-width="1.5"/>`;
+  else shape=`<ellipse cx="70" cy="31" rx="31" ry="14" fill="#e7f4fb"/><path d="M39 31v31c0 8 14 14 31 14s31-6 31-14V31" fill="url(#steelSide)"/><ellipse cx="70" cy="31" rx="31" ry="14" fill="url(#steelTop)" stroke="#f4fbff" stroke-width="1.5"/><path d="M43 34v25" stroke="#fff" stroke-opacity=".55" stroke-width="2"/><path d="M70 18c17 0 31 6 31 13" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width="2"/>`;
+  return `<svg class="machine-steel-art" viewBox="0 0 132 92" focusable="false" aria-hidden="true">${common}<ellipse cx="68" cy="77" rx="48" ry="5" fill="#061b2b" opacity=".34"/>${shape}</svg>`;
+ };
  const levelFor=(e,k)=>e.skillLevels?.[k];
  host.innerHTML=list.map(e=>{
   const lvls=keys.map(k=>({k,has:!!e.skills?.[k],lv:levelFor(e,k)}));
@@ -661,7 +673,7 @@ function renderEmployeeSkillCards(selectedName=null,targetId="employeeSkillCards
    const label=known?`Lv.${lv}`:'Tidak tercatat / 未记录';
    const desc=known?info:{name:'Skill belum tercatat / 未记录',desc:'Belum ada data kemampuan',cn:'暂无技能记录'};
    const pct=info?info.pct:0, color=info?info.color:'#ef4444', cls=known?`skill-lv-${lv}`:'skill-unrecorded';
-   return `<div class="skill-machine-row"><div class="skill-machine-thumb" aria-hidden="true">${machineIcon[k]}</div><div class="skill-machine-main"><div class="skill-machine-name">${skillLabel[k].split(' / ')[0]}<small>${skillLabel[k].split(' / ')[1]||''}</small></div><div class="skill-machine-detail"><span class="skill-level-badge ${cls}">${label}</span><label class="skill-edit-control"><span>Edit level</span><select aria-label="Ubah level ${esc(e.name)} - ${esc(k)}" data-skill-edit="${esc(e.name)}" data-skill-key="${esc(k)}"><option value="none" ${(!has||!(lv>=1&&lv<=4))?'selected':''}>Tidak tercatat</option>${[1,2,3,4].map(n=>`<option value="${n}" ${has&&lv===n?'selected':''}>Lv.${n}</option>`).join('')}</select></label><div class="skill-description">${desc.name}<small>${desc.desc}${desc.cn?`<br>${desc.cn}`:''}</small></div></div><div class="skill-progress"><div class="skill-progress-track"><div class="skill-progress-fill" style="width:${pct}%;background:${color}"></div></div><span class="skill-percent">${pct}%</span></div></div></div>`;
+   return `<div class="skill-machine-row"><div class="skill-machine-thumb" aria-hidden="true">${machineVisual(k)}</div><div class="skill-machine-main"><div class="skill-machine-name">${skillLabel[k].split(' / ')[0]}<small>${skillLabel[k].split(' / ')[1]||''}</small></div><div class="skill-machine-detail"><span class="skill-level-badge ${cls}">${label}</span><label class="skill-edit-control"><span>Edit level</span><select aria-label="Ubah level ${esc(e.name)} - ${esc(k)}" data-skill-edit="${esc(e.name)}" data-skill-key="${esc(k)}"><option value="none" ${(!has||!(lv>=1&&lv<=4))?'selected':''}>Tidak tercatat</option>${[1,2,3,4].map(n=>`<option value="${n}" ${has&&lv===n?'selected':''}>Lv.${n}</option>`).join('')}</select></label><div class="skill-description">${desc.name}<small>${desc.desc}${desc.cn?`<br>${desc.cn}`:''}</small></div></div><div class="skill-progress"><div class="skill-progress-track"><div class="skill-progress-fill" style="width:${pct}%;background:${color}"></div></div><span class="skill-percent">${pct}%</span></div></div></div>`;
   }).join('');
   const legend=[4,3,2,1].map(lv=>`<div class="skill-legend-row"><span class="skill-legend-level skill-lv-${lv}">Lv.${lv}</span><span>${levelInfo[lv].name}<small>${levelInfo[lv].desc}</small></span></div>`).join('');
   const distribution=[4,3,2,1].map(lv=>{const count=lvls.filter(x=>x.has&&x.lv===lv).length;return `<div class="skill-distribution-row"><b>Lv.${lv}</b><div class="skill-distribution-track"><div class="skill-distribution-fill" style="width:${count/3*100}%;background:${levelInfo[lv].color}"></div></div><span>${count}/3</span></div>`}).join('');
