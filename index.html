@@ -622,7 +622,7 @@ const employees = []; const EMBEDDED_EMPLOYEE_DATA = []; // Data karyawan dimuat
 const offSchedule = {dates:[],employees:[]};
 const teamLabel={A:"Regu A / A班组",B:"Regu B / B班组",C:"Regu C / C班组",Pendukung:"Pendukung / 支持人员","Belum ditentukan":"Belum ditentukan / 未指定"};
 const skillLabel={"Baja Lebar":"MESIN BAJA LEBAR / 板坯修磨机","Baja Balok":"MESIN BAJA BALOK / 方坯修磨机","Baja Bulat":"MESIN BAJA BULAT / 圆坯修磨机"};
-const roleLabel={"Anggota":"Anggota / 班组成员","WAKIL FOREMANA":"WAKIL FOREMAN A / A班副班长","WAKIL FOREMANB":"WAKIL FOREMANB / B 副班长","WAKIL FOREMANC":"WAKIL FOREMANC / C 副班长","Wakil Foreman Reguler":"Wakil Foreman Reguler / 常白班副班长","Input Data":"Petugas Input Data / 数据录入员","Foreman":"Foreman / 班长"};
+const roleLabel={"Anggota":"Anggota / 班组成员","WAKIL FOREMAN A":"WAKIL FOREMAN  A / A班副班长","WAKIL FOREMAN B":"WAKIL FOREMAN B / B 副班长","WAKIL FOREMAN C":"WAKIL FOREMAN C / C 副班长","WAKIL FOREMAN  Reguler":"WAKIL FOREMAN  Reguler / 常白班副班长","Input Data":"Petugas Input Data / 数据录入员","Foreman":"Foreman / 班长"};
 const keys=["Baja Lebar","Baja Balok","Baja Bulat"];
 const $=id=>document.getElementById(id);
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
@@ -632,7 +632,7 @@ function roleText(e){return roleLabel[e.role]||e.role||"—";}
 function jobText(job){
   const j=String(job||"");
   if(j.includes("FOREMAN GRINDING TRANSFER 修磨转运班长")) return "Foreman Grinding Transfer / 修磨转运班长";
-  if(j.includes("WAKIL FOREMAN GRINDING TRANSFER 修磨转运副班长")) return "Wakil Foreman Grinding Transfer / 修磨转运副班长";
+  if(j.includes("WAKIL FOREMAN  GRINDING TRANSFER 修磨转运副班长")) return "WAKIL FOREMAN  Grinding Transfer / 修磨转运副班长";
   if(j.includes("PEKERJA DATA TRANSPORTER 转运数据工")) return "Petugas data transportasi / 转运数据工";
   if(j.includes("GRINDING WORKER LEVEL 2 修磨工二级")) return "Operator gerinda Level 2 / 修磨工二级";
   if(j.includes("TRANSPORTER LEVEL 转运工三级")) return "Petugas transportasi Level 3 / 转运工三级";
@@ -763,13 +763,13 @@ function renderOrgChart(){
   const teamMarkup=['A','B','C'].map(t=>{
     const leader=find(leaderNames[t]);
     const members=employees.filter(e=>e.team===t&&e.name.toUpperCase()!==leaderNames[t]);
-    return `<section class="org-team"><div class="org-team-head"><div class="team-title">${teamLabels[t][0]}</div><div class="team-sub">${teamLabels[t][1]}</div><span class="org-count">${members.length+(leader?1:0)} personel / 人</span></div>${leader?`<div class="org-leader">${node(leader,leader.name,'WAKIL FOREMAN'+t+' / '+t+' 副班长',leader.job||'','')}</div>`:`<div class="org-leader"><article class="org-node"><div class="org-name">Pemimpin belum ditentukan /  副班长待定</div></article></div>`}<div class="org-members">${members.map(e=>`<article class="org-member">${photo(e)}<div><div class="member-name">${esc(e.name)}</div><div class="member-job">${esc(e.job||'Anggota / 成员')}</div></div></article>`).join('')}</div></section>`;
+    return `<section class="org-team"><div class="org-team-head"><div class="team-title">${teamLabels[t][0]}</div><div class="team-sub">${teamLabels[t][1]}</div><span class="org-count">${members.length+(leader?1:0)} personel / 人</span></div>${leader?`<div class="org-leader">${node(leader,leader.name,'WAKIL FOREMAN '+t+' / '+t+' 副班长',leader.job||'','')}</div>`:`<div class="org-leader"><article class="org-node"><div class="org-name">Pemimpin belum ditentukan /  副班长待定</div></article></div>`}<div class="org-members">${members.map(e=>`<article class="org-member">${photo(e)}<div><div class="member-name">${esc(e.name)}</div><div class="member-job">${esc(e.job||'Anggota / 成员')}</div></div></article>`).join('')}</div></section>`;
   }).join('');
   const china=find('张锋');
   const herman=find('HERMAN SAPUTRA');
   const aswar=find('ASWAR');
   const admin=find('LAODE YAKUB VAKAD MUHADAR');
-  const support=`<div class="org-support-grid"><div class="org-node support"><div class="org-node-main">${photo(aswar)}<div><div class="org-name">ASWAR</div><div class="org-role">Wakil Pemimpin / 副负责人</div><div class="org-meta">Wakil Foreman / 副班长</div></div></div></div><div class="org-node support"><div class="org-node-main">${photo(admin)}<div><div class="org-name">LAODE YAKUB VAKAD MUHADAR</div><div class="org-role">Admin Statistik / 数据统计管理员</div><div class="org-meta">Input Data / 数据录入</div></div></div></div></div>`;
+  const support=`<div class="org-support-grid"><div class="org-node support"><div class="org-node-main">${photo(aswar)}<div><div class="org-name">ASWAR</div><div class="org-role">Wakil Pemimpin / 副负责人</div><div class="org-meta">WAKIL FOREMAN  / 副班长</div></div></div></div><div class="org-node support"><div class="org-node-main">${photo(admin)}<div><div class="org-name">LAODE YAKUB VAKAD MUHADAR</div><div class="org-role">Admin Statistik / 数据统计管理员</div><div class="org-meta">Input Data / 数据录入</div></div></div></div></div>`;
   const overviewHost=document.getElementById('orgChartOverview');
   if(!overviewHost)return;
   const markup=`<div class="org-top">${node(china,'张锋','班长 · Pemimpin dari Tiongkok','118041304','china')}<div class="org-connector"></div>${node(herman,'HERMAN SAPUTRA','Pemimpin Karyawan Indonesia','Foreman / 班组负责人','foreman')}<div class="org-connector"></div>${support}<div class="org-team-connector"></div></div><div class="org-teams">${teamMarkup}</div>`;
