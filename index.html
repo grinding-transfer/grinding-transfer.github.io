@@ -136,6 +136,41 @@ table{min-width:1600px}
 .login-submit{width:100%;margin-top:18px;border:1px solid #39869a;border-radius:10px;padding:12px;background:linear-gradient(120deg,#1a6677,#24528a);color:#fff;font-weight:850;font:inherit;cursor:pointer}
 .login-submit:disabled{opacity:.55;cursor:wait}.login-status{min-height:20px;margin-top:12px;color:#ffbf86;font-size:12px;line-height:1.5}.login-foot{margin-top:14px;color:#8299b2;font-size:10px;text-align:center}
 
+
+/* Mode Viewer: antarmuka hanya-baca. Pembatasan utama tetap ditegakkan oleh Supabase RLS dan bridge. */
+body.viewer-mode #addEmployeeForm,
+body.viewer-mode [data-remove-employee],
+body.viewer-mode .employee-team-select,
+body.viewer-mode .employee-level-select,
+body.viewer-mode #offAddButton,
+body.viewer-mode [data-off-delete],
+body.viewer-mode #attSaveEntry,
+body.viewer-mode #s4AddRow,
+body.viewer-mode #s4ClearRows,
+body.viewer-mode #s4Rows [data-save],
+body.viewer-mode #s4Rows [data-del],
+body.viewer-mode #s4Rows input[type=file],
+body.viewer-mode #s4Rows .s4-photo,
+body.viewer-mode #sanctions button[data-action],
+body.viewer-mode #sanctions .sanction-add,
+body.viewer-mode #sanctions form button[type=submit],
+body.viewer-mode #sanctionForm,
+body.viewer-mode #sanctions button[type=submit],
+body.viewer-mode #sanctions [data-sanction-edit],
+body.viewer-mode #sanctions [data-sanction-delete],
+body.viewer-mode #employees input,
+body.viewer-mode #employees select:not(#teamFilter):not(#companyFilter):not(#skillFilter),
+body.viewer-mode #employees button[data-edit],
+body.viewer-mode #employees button[data-remove-employee],
+body.viewer-mode #attendance button:not(.sheet-tab),
+body.viewer-mode #off button:not(.sheet-tab),
+body.viewer-mode #steel-code-errors button:not(.sheet-tab),
+body.viewer-mode #steel-code-errors input,
+body.viewer-mode #steel-code-errors select,
+body.viewer-mode #steel-code-errors textarea { display:none !important; }
+body.viewer-mode #steel-code-errors input[type=search],
+body.viewer-mode #steel-code-errors select[id$=Filter] { display:initial !important; }
+
 </style>
 <style id="skill-card-ktp-redesign">
 /* Kartu skill bergaya kartu identitas (landscape) */
@@ -277,16 +312,31 @@ nav.sheet-tabs[role="tablist"] > .sheet-tab {
 <form class="login-card" id="foremanLoginForm">
 <div class="login-mark">GT</div>
 <div class="eyebrow">GRINDING TRANSFER</div>
-<h1 id="loginTitle">Login Foreman / 班长登录</h1>
-<p>Masuk menggunakan akun Foreman yang telah terdaftar.</p>
-<label for="foremanEmail">Email</label>
-<input autocomplete="username" id="foremanEmail" required="" type="email" value="hermansaputra238@gmail.com"/>
+<h1 id="loginTitle">Login Grinding Transfer / 系统登录</h1>
+<p>Masuk menggunakan NIK dan password akun Anda.</p>
+<label for="foremanNik">NIK</label>
+<input autocomplete="username" id="foremanNik" inputmode="numeric" maxlength="20" pattern="[0-9]{4,20}" required="" type="text" placeholder="Masukkan NIK"/>
 <label for="foremanPassword">Password</label>
 <input autocomplete="current-password" id="foremanPassword" placeholder="Masukkan password" required="" type="password"/>
 <button class="login-submit" id="foremanLoginButton" type="submit">Masuk / 登录</button>
 <div aria-live="polite" class="login-status" id="foremanLoginStatus" role="status"></div>
-<div class="login-foot">Akses hanya untuk akun Foreman yang memiliki role admin.</div>
+<div class="login-foot">Admin: akses penuh · Viewer: hanya melihat data.</div>
 </form>
+</div>
+<div id="passwordDialog" role="dialog" aria-modal="true" aria-labelledby="passwordDialogTitle" style="display:none;position:fixed;inset:0;z-index:100000;background:#000b;place-items:center;padding:18px;">
+  <form id="passwordChangeForm" style="width:min(100%,420px);background:#14263b;border:1px solid #45617e;border-radius:16px;padding:22px;color:#f8fafc;box-shadow:0 20px 60px #0008;">
+    <h2 id="passwordDialogTitle" style="margin:0 0 8px;font-size:20px;">Ubah Password</h2>
+    <p style="margin:0 0 16px;color:#b8c7d9;font-size:13px;">Gunakan password baru minimal 8 karakter.</p>
+    <label for="newPassword" style="display:block;margin:10px 0 6px;">Password baru</label>
+    <input id="newPassword" type="password" minlength="8" autocomplete="new-password" required style="width:100%;box-sizing:border-box;padding:12px;border-radius:8px;border:1px solid #49627e;background:#0b192a;color:white;">
+    <label for="confirmNewPassword" style="display:block;margin:12px 0 6px;">Ulangi password baru</label>
+    <input id="confirmNewPassword" type="password" minlength="8" autocomplete="new-password" required style="width:100%;box-sizing:border-box;padding:12px;border-radius:8px;border:1px solid #49627e;background:#0b192a;color:white;">
+    <div id="passwordChangeStatus" role="status" aria-live="polite" style="min-height:20px;margin:10px 0;color:#fbbf24;font-size:13px;"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;">
+      <button id="cancelPasswordChange" type="button" class="button">Batal</button>
+      <button id="savePasswordChange" type="submit" class="button">Simpan Password</button>
+    </div>
+  </form>
 </div>
 <div class="wrap">
 <header class="top">
@@ -1028,9 +1078,15 @@ async function init(){
   $("closeModal").addEventListener("click",closeModal);$("modalBack").addEventListener("click",e=>{if(e.target===$("modalBack"))closeModal()});
   render();
   window.__dashboardReady=true;
+  document.body.classList.toggle('viewer-mode', DashboardSupabase.role === 'viewer');
   const statusPill=document.querySelector('.status');
   if(statusPill){
-    statusPill.innerHTML='<i></i>Terhubung ke Supabase';
+    statusPill.innerHTML='<i></i>'+(DashboardSupabase.role==='admin'?'ADMIN · Terhubung ke Supabase':'VIEWER · Mode hanya melihat');
+    const changePass=document.createElement('button');
+    changePass.type='button'; changePass.textContent='Ubah Password';
+    changePass.className='button'; changePass.style.marginLeft='8px';
+    changePass.addEventListener('click',()=>openPasswordDialog());
+    statusPill.appendChild(changePass);
     const logout=document.createElement('button');
     logout.type='button'; logout.textContent='Keluar / 退出';
     logout.className='button'; logout.style.marginLeft='8px';
@@ -1314,15 +1370,42 @@ function recordsFor(m){return (attendanceSource[m]||{records:[]}).records;}
   if(!form)return;
   const button=document.getElementById('foremanLoginButton');
   const status=document.getElementById('foremanLoginStatus');
+  const passwordDialog=document.getElementById('passwordDialog');
+  const passwordForm=document.getElementById('passwordChangeForm');
+  const passwordStatus=document.getElementById('passwordChangeStatus');
+  window.openPasswordDialog=function(){
+    passwordForm.reset(); passwordStatus.textContent='';
+    passwordDialog.style.display='grid';
+    document.getElementById('newPassword').focus();
+  };
+  function closePasswordDialog(){passwordDialog.style.display='none';passwordForm.reset();passwordStatus.textContent='';}
+  document.getElementById('cancelPasswordChange').addEventListener('click',closePasswordDialog);
+  passwordDialog.addEventListener('click',event=>{if(event.target===passwordDialog)closePasswordDialog();});
+  passwordForm.addEventListener('submit',async event=>{
+    event.preventDefault();
+    const next=document.getElementById('newPassword').value;
+    const confirm=document.getElementById('confirmNewPassword').value;
+    if(next.length<8){passwordStatus.textContent='Password minimal 8 karakter.';return;}
+    if(next!==confirm){passwordStatus.textContent='Konfirmasi password tidak sama.';return;}
+    const save=document.getElementById('savePasswordChange'); save.disabled=true;
+    passwordStatus.textContent='Memperbarui password...';
+    try{
+      await DashboardSupabase.changePassword(next);
+      passwordStatus.textContent='Password berhasil diubah.';
+      passwordForm.reset();
+      setTimeout(()=>{closePasswordDialog();alert('Password berhasil diubah. Gunakan password baru saat login berikutnya.');},500);
+    }catch(error){passwordStatus.textContent=error.message||'Password gagal diperbarui.';}
+    finally{save.disabled=false;}
+  });
   form.addEventListener('submit',async event=>{
     event.preventDefault();
     button.disabled=true;
-    status.textContent='Memeriksa akun Foreman...';
+    status.textContent='Memeriksa NIK dan password...';
     try{
       if(!window.DashboardSupabase) throw new Error('Bridge Supabase belum siap. Muat ulang halaman.');
       await DashboardSupabase.init();
       await DashboardSupabase.signIn(
-        document.getElementById('foremanEmail').value.trim(),
+        document.getElementById('foremanNik').value.trim(),
         document.getElementById('foremanPassword').value
       );
       status.textContent='Login berhasil. Memuat data karyawan...';
@@ -1330,7 +1413,7 @@ function recordsFor(m){return (attendanceSource[m]||{records:[]}).records;}
       await window.__startDashboardAfterLogin();
       if(window.__dashboardReady) document.getElementById('foremanPassword').value='';
     }catch(error){
-      status.textContent=error.message||'Login gagal. Periksa email dan password.';
+      status.textContent=error.message||'Login gagal. Periksa NIK dan password.';
     }finally{button.disabled=false;}
   });
 })();

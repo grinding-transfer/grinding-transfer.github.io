@@ -19,6 +19,12 @@
 
   let client = null;
   let currentUser = null;
+  let currentRole = null;
+  const ADMIN_NIK = '80709119';
+  const NIK_EMAIL_DOMAIN = 'grinding-transfer.local';
+  const nikToEmail = nik => `nik.${String(nik).trim()}@${NIK_EMAIL_DOMAIN}`;
+  function isAdmin() { return currentRole === 'admin'; }
+  function requireAdmin() { if (!currentUser || !isAdmin()) throw new Error('Akses ditolak. Akun Viewer hanya dapat melihat data.'); }
 
   function configured() {
     return CONFIG.url.startsWith('https://') &&
@@ -34,16 +40,17 @@
     return client;
   }
 
-  async function verifyAdmin(user) {
+  async function getUserRole(user) {
     const c = requireClient();
-    if (!user) return false;
-    const { data: roleRows, error } = await c
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id)
-      .limit(1);
+    if (!user) return null;
+    const { data: rows, error } = await c.from('user_roles')
+      .select('role,nik,full_name').eq('user_id', user.id).limit(1);
     if (error) throw error;
-    return !!roleRows?.some(row => row.role === 'admin');
+    const row = rows?.[0];
+    if (!row || !['admin','viewer'].includes(row.role)) return null;
+    // The sole administrator is pinned to the approved NIK and matching role record.
+    if (row.role === 'admin' && String(row.nik || '') !== ADMIN_NIK) return null;
+    return row;
   }
 
   async function init() {
@@ -74,51 +81,48 @@
     if (error) throw error;
 
     currentUser = data.session?.user || null;
+    currentRole = null;
     if (currentUser) {
-      let allowed = false;
-      try { allowed = await verifyAdmin(currentUser); }
-      catch (err) {
-        await client.auth.signOut();
-        currentUser = null;
-        throw err;
+      try {
+        const roleRow = await getUserRole(currentUser);
+        currentRole = roleRow?.role || null;
+      } catch (err) {
+        await client.auth.signOut(); currentUser = null; currentRole = null; throw err;
       }
-      if (!allowed) {
-        await client.auth.signOut();
-        currentUser = null;
-      }
+      if (!currentRole) { await client.auth.signOut(); currentUser = null; }
     }
-
-    return { client, user: currentUser, authorized: !!currentUser };
+    return { client, user: currentUser, role: currentRole, authorized: !!currentUser };
   }
 
-  async function signIn(email, password) {
+  async function signIn(nik, password) {
     const c = requireClient();
-
-    const { data, error } =
-      await c.auth.signInWithPassword({
-        email,
-        password
-      });
-
-    if (error) throw error;
-
+    const normalizedNik = String(nik || '').trim();
+    if (!/^\d{4,20}$/.test(normalizedNik)) throw new Error('Masukkan NIK berupa angka yang valid.');
+    if (!password) throw new Error('Password wajib diisi.');
+    const { data, error } = await c.auth.signInWithPassword({ email: nikToEmail(normalizedNik), password });
+    if (error) throw new Error('NIK atau password tidak sesuai.');
     currentUser = data.user;
-
-    // Memeriksa hak akses Foreman.
-    let allowed = false;
-    try { allowed = await verifyAdmin(data.user); }
-    catch (roleError) {
-      await c.auth.signOut();
-      currentUser = null;
-      throw roleError;
+    try {
+      const roleRow = await getUserRole(data.user);
+      if (!roleRow) throw new Error('Akun belum terdaftar sebagai Admin atau Viewer.');
+      if (roleRow.role === 'admin' && (normalizedNik !== ADMIN_NIK || String(roleRow.nik || '') !== ADMIN_NIK))
+        throw new Error('Hak Admin hanya diberikan kepada Herman Saputra dengan NIK yang ditetapkan.');
+      if (String(roleRow.nik || '') !== normalizedNik) throw new Error('NIK akun tidak cocok dengan data hak akses.');
+      currentRole = roleRow.role;
+    } catch (err) {
+      await c.auth.signOut(); currentUser = null; currentRole = null; throw err;
     }
-    if (!allowed) {
-      await c.auth.signOut();
-      currentUser = null;
-      throw new Error('Akun ini tidak memiliki hak akses Foreman.');
-    }
+    return { user: data.user, role: currentRole };
+  }
 
-    return data.user;
+  async function changePassword(newPassword) {
+    const c = requireClient();
+    if (!currentUser) throw new Error('Silakan login terlebih dahulu.');
+    const password = String(newPassword || '');
+    if (password.length < 8) throw new Error('Password baru minimal 8 karakter.');
+    const { error } = await c.auth.updateUser({ password });
+    if (error) throw new Error(error.message || 'Password gagal diperbarui.');
+    return true;
   }
 
   async function signOut() {
@@ -129,6 +133,7 @@
     if (error) throw error;
 
     currentUser = null;
+    currentRole = null;
   }
 
   async function getSession() {
@@ -139,10 +144,11 @@
     if (error) throw error;
 
     currentUser = data.session?.user || null;
-    if (currentUser && !(await verifyAdmin(currentUser))) {
-      await c.auth.signOut();
-      currentUser = null;
-      return null;
+    currentRole = null;
+    if (currentUser) {
+      const roleRow = await getUserRole(currentUser);
+      currentRole = roleRow?.role || null;
+      if (!currentRole) { await c.auth.signOut(); currentUser = null; return null; }
     }
     return currentUser ? data.session : null;
   }
@@ -293,6 +299,7 @@
 
   async function saveEmployee(employee) {
     const c = requireClient();
+    requireAdmin();
 
     const {
       id, name, team, photo, simperPhoto, riggerPhoto,
@@ -326,6 +333,7 @@
 
   async function deleteEmployee(id) {
     const c = requireClient();
+    requireAdmin();
 
     const { error } = await c
       .from('employees')
@@ -342,6 +350,7 @@
     details = {}
   ) {
     const c = requireClient();
+    requireAdmin();
 
     const { data, error } = await c
       .from('employee_skills')
@@ -363,6 +372,7 @@
 
   async function deleteSkill(employeeId, machine) {
     const c = requireClient();
+    requireAdmin();
 
     const { error } = await c
       .from('employee_skills')
@@ -379,6 +389,7 @@
     details = {}
   ) {
     const c = requireClient();
+    requireAdmin();
 
     const { data, error } = await c
       .from('off_schedules')
@@ -399,6 +410,7 @@
 
   async function deleteOffSchedule(employeeId, offDate) {
     const c = requireClient();
+    requireAdmin();
 
     const { error } = await c
       .from('off_schedules')
@@ -415,6 +427,7 @@
     details = {}
   ) {
     const c = requireClient();
+    requireAdmin();
 
     const { data, error } = await c
       .from('attendance_records')
@@ -438,6 +451,7 @@
     attendanceMonth
   ) {
     const c = requireClient();
+    requireAdmin();
 
     const { error } = await c
       .from('attendance_records')
@@ -450,6 +464,7 @@
 
   async function uploadSteelCodePhoto(file, recordId, category) {
     const c = requireClient();
+    requireAdmin();
     if (!currentUser) throw new Error('Silakan login sebagai Foreman terlebih dahulu.');
     if (!['wrong', 'correct'].includes(category)) throw new Error('Kategori foto kesalahan tidak valid.');
     if (!(file instanceof File)) throw new Error('File foto tidak valid.');
@@ -473,6 +488,7 @@
 
   async function saveSteelCodeError(record) {
     const c = requireClient();
+    requireAdmin();
 
     const { data, error } = await c
       .from('steel_code_errors')
@@ -487,6 +503,7 @@
 
   async function updateSteelCodeError(id, changes) {
     const c = requireClient();
+    requireAdmin();
     const { data, error } = await c.from('steel_code_errors')
       .update(changes).eq('id', id).select().single();
     if (error) throw error;
@@ -495,6 +512,7 @@
 
   async function deleteSteelCodeError(id) {
     const c = requireClient();
+    requireAdmin();
 
     const { error } = await c
       .from('steel_code_errors')
@@ -506,6 +524,7 @@
 
   async function saveSanction(record) {
     const c = requireClient();
+    requireAdmin();
 
     const { data, error } = await c
       .from('employee_sanctions')
@@ -520,6 +539,7 @@
 
   async function updateSanction(id, changes) {
     const c = requireClient();
+    requireAdmin();
     const { data, error } = await c.from('employee_sanctions')
       .update(changes).eq('id', id).select().single();
     if (error) throw error;
@@ -528,6 +548,7 @@
 
   async function deleteSanction(id) {
     const c = requireClient();
+    requireAdmin();
 
     const { error } = await c
       .from('employee_sanctions')
@@ -543,6 +564,7 @@
     category
   ) {
     const c = requireClient();
+    requireAdmin();
 
     if (!['profil', 'simper', 'rigger'].includes(category)) {
       throw new Error('Kategori foto tidak valid.');
@@ -593,6 +615,7 @@
   global.DashboardSupabase = Object.freeze({
     init,
     signIn,
+    changePassword,
     signOut,
     getSession,
     loadDashboard,
@@ -621,9 +644,9 @@
 
     uploadEmployeePhoto,
 
-    get user() {
-      return currentUser;
-    }
+    get user() { return currentUser; },
+    get role() { return currentRole; },
+    get isAdmin() { return isAdmin(); }
   });
 
 })(window);
