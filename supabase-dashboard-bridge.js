@@ -282,7 +282,11 @@
       employeeSkills: skills.data || [],
       offSchedules: attachNames(offs.data),
       attendanceRecords: attachNames(attendance.data),
-      steelCodeErrors: errors.data || [],
+      steelCodeErrors: await Promise.all((errors.data || []).map(async row => ({
+        ...row,
+        wrong_photo_url: row.wrong_photo_path ? await signedPhoto(row.wrong_photo_path) : '',
+        correct_photo_url: row.correct_photo_path ? await signedPhoto(row.correct_photo_path) : ''
+      }))),
       employeeSanctions: sanctions.data || []
     };
   }
@@ -444,6 +448,29 @@
     if (error) throw error;
   }
 
+  async function uploadSteelCodePhoto(file, recordId, category) {
+    const c = requireClient();
+    if (!currentUser) throw new Error('Silakan login sebagai Foreman terlebih dahulu.');
+    if (!['wrong', 'correct'].includes(category)) throw new Error('Kategori foto kesalahan tidak valid.');
+    if (!(file instanceof File)) throw new Error('File foto tidak valid.');
+    if (!recordId) throw new Error('Simpan catatan terlebih dahulu sebelum mengunggah foto.');
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+    const path = `steel-code-errors/${recordId}/${category}_${Date.now()}.${ext}`;
+    const { error } = await c.storage.from(CONFIG.photoBucket).upload(path, file, {
+      cacheControl: '3600', upsert: false, contentType: file.type || 'image/jpeg'
+    });
+    if (error) throw error;
+    return path;
+  }
+
+  async function signedStorageUrl(path) {
+    if (!path) return '';
+    const c = requireClient();
+    const { data, error } = await c.storage.from(CONFIG.photoBucket).createSignedUrl(path, 3600);
+    if (error) throw error;
+    return data?.signedUrl || '';
+  }
+
   async function saveSteelCodeError(record) {
     const c = requireClient();
 
@@ -585,6 +612,8 @@
     saveSteelCodeError,
     updateSteelCodeError,
     deleteSteelCodeError,
+    uploadSteelCodePhoto,
+    signedStorageUrl,
 
     saveSanction,
     updateSanction,
