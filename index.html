@@ -1134,17 +1134,37 @@ async function init(){
 
         try {
           const result = await DashboardSupabase.createViewers();
-          const created = Number(result.created ?? result.created_count ?? 0);
-          const skipped = Number(result.skipped ?? result.skipped_count ?? 0);
-          const failed = Number(result.failed ?? result.failed_count ?? 0);
+
+          // Edge Function may return an error object with HTTP 200.
+          if (result?.error) {
+            const extra = result.invalid_count != null
+              ? ` (data tidak valid: ${result.invalid_count})`
+              : '';
+            throw new Error(String(result.error) + extra);
+          }
+
+          const created = Number(result?.created ?? result?.created_count ?? 0);
+          const skipped = Number(result?.skipped ?? result?.skipped_count ?? 0);
+          const failed = Number(
+            result?.failed_count ??
+            (Array.isArray(result?.failed) ? result.failed.length : result?.failed ?? 0)
+          );
+
+          const failureDetails = Array.isArray(result?.failed)
+            ? result.failed.slice(0, 5).map(item =>
+                `${item.nik || 'NIK tidak diketahui'}: ${item.reason || 'Penyebab tidak dijelaskan'}`
+              ).join('\n')
+            : '';
 
           createViewerStatus.textContent =
             `Selesai — berhasil: ${created}, dilewati: ${skipped}, gagal: ${failed}.`;
+
           window.alert(
             'Proses pembuatan akun Viewer selesai.\n\n' +
             `Berhasil dibuat: ${created}\n` +
             `Dilewati: ${skipped}\n` +
-            `Gagal: ${failed}`
+            `Gagal: ${failed}` +
+            (failureDetails ? `\n\nRincian 5 kegagalan pertama:\n${failureDetails}` : '')
           );
         } catch (error) {
           const message = error?.message || String(error);
