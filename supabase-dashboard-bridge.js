@@ -21,8 +21,6 @@
   let currentUser = null;
   let currentRole = null;
   const ADMIN_NIK = '80709119';
-  const NIK_EMAIL_DOMAIN = 'grinding-transfer.local';
-  const nikToEmail = nik => `nik.${String(nik).trim()}@${NIK_EMAIL_DOMAIN}`;
   function isAdmin() { return currentRole === 'admin'; }
   function requireAdmin() { if (!currentUser || !isAdmin()) throw new Error('Akses ditolak. Akun Viewer hanya dapat melihat data.'); }
 
@@ -99,20 +97,57 @@
     const normalizedNik = String(nik || '').trim();
     if (!/^\d{4,20}$/.test(normalizedNik)) throw new Error('Masukkan NIK berupa angka yang valid.');
     if (!password) throw new Error('Password wajib diisi.');
-    const { data, error } = await c.auth.signInWithPassword({ email: nikToEmail(normalizedNik), password });
-    if (error) throw new Error('NIK atau password tidak sesuai.');
-    currentUser = data.user;
+    // Authenticate through the login-nik Edge Function. The function maps
+    // the supplied NIK to the existing Auth user; no email alias is constructed
+    // in the browser.
+    const { data: loginData, error: loginError } = await c.functions.invoke('login-nik', {
+      body: { nik: normalizedNik, password }
+    });
+
+    if (loginError) {
+      console.error('login-nik invocation failed:', loginError);
+      throw new Error('Login gagal. Periksa NIK dan password, lalu coba lagi.');
+    }
+
+    if (!loginData?.access_token || !loginData?.refresh_token || !loginData?.user?.id) {
+      console.error('login-nik returned an incomplete session response');
+      throw new Error(loginData?.error || 'Respons login dari server tidak lengkap.');
+    }
+
+    // Establish the Supabase client session using tokens returned by the Edge Function.
+    const { data: sessionData, error: sessionError } = await c.auth.setSession({
+      access_token: loginData.access_token,
+      refresh_token: loginData.refresh_token
+    });
+
+    if (sessionError || !sessionData?.user) {
+      await c.auth.signOut();
+      currentUser = null;
+      currentRole = null;
+      throw new Error('Sesi login tidak dapat dibuat. Silakan coba lagi.');
+    }
+
+    currentUser = sessionData.user;
     try {
-      const roleRow = await getUserRole(data.user);
+      if (currentUser.id !== loginData.user.id) {
+        throw new Error('Identitas akun hasil login tidak cocok.');
+      }
+      const roleRow = await getUserRole(currentUser);
       if (!roleRow) throw new Error('Akun belum terdaftar sebagai Admin atau Viewer.');
-      if (roleRow.role === 'admin' && (normalizedNik !== ADMIN_NIK || String(roleRow.nik || '') !== ADMIN_NIK))
-        throw new Error('Hak Admin hanya diberikan kepada Herman Saputra dengan NIK yang ditetapkan.');
-      if (String(roleRow.nik || '') !== normalizedNik) throw new Error('NIK akun tidak cocok dengan data hak akses.');
+      if (String(roleRow.nik || '') !== normalizedNik) {
+        throw new Error('NIK akun tidak cocok dengan data hak akses.');
+      }
+      if (roleRow.role === 'admin' && normalizedNik !== ADMIN_NIK) {
+        throw new Error('Hak Admin hanya diberikan kepada NIK yang telah ditetapkan.');
+      }
       currentRole = roleRow.role;
     } catch (err) {
-      await c.auth.signOut(); currentUser = null; currentRole = null; throw err;
+      await c.auth.signOut();
+      currentUser = null;
+      currentRole = null;
+      throw err;
     }
-    return { user: data.user, role: currentRole };
+    return { user: currentUser, role: currentRole };
   }
 
   async function changePassword(newPassword) {
