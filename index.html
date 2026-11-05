@@ -558,7 +558,7 @@ nav.sheet-tabs[role="tablist"] > .sheet-tab {
 <div id="sanPointsWrap"><label for="sanPoints">Potong Poin (1–100) / 扣分（1–100）</label><select disabled="" id="sanPoints"><option value="">Pilih jumlah poin / 选择扣分</option><option value="1">1 poin / 1分</option><option value="2">2 poin / 2分</option><option value="3">3 poin / 3分</option><option value="4">4 poin / 4分</option><option value="5">5 poin / 5分</option><option value="6">6 poin / 6分</option><option value="7">7 poin / 7分</option><option value="8">8 poin / 8分</option><option value="9">9 poin / 9分</option><option value="10">10 poin / 10分</option><option value="11">11 poin / 11分</option><option value="12">12 poin / 12分</option><option value="13">13 poin / 13分</option><option value="14">14 poin / 14分</option><option value="15">15 poin / 15分</option><option value="16">16 poin / 16分</option><option value="17">17 poin / 17分</option><option value="18">18 poin / 18分</option><option value="19">19 poin / 19分</option><option value="20">20 poin / 20分</option><option value="21">21 poin / 21分</option><option value="22">22 poin / 22分</option><option value="23">23 poin / 23分</option><option value="24">24 poin / 24分</option><option value="25">25 poin / 25分</option><option value="26">26 poin / 26分</option><option value="27">27 poin / 27分</option><option value="28">28 poin / 28分</option><option value="29">29 poin / 29分</option><option value="30">30 poin / 30分</option><option value="31">31 poin / 31分</option><option value="32">32 poin / 32分</option><option value="33">33 poin / 33分</option><option value="34">34 poin / 34分</option><option value="35">35 poin / 35分</option><option value="36">36 poin / 36分</option><option value="37">37 poin / 37分</option><option value="38">38 poin / 38分</option><option value="39">39 poin / 39分</option><option value="40">40 poin / 40分</option><option value="41">41 poin / 41分</option><option value="42">42 poin / 42分</option><option value="43">43 poin / 43分</option><option value="44">44 poin / 44分</option><option value="45">45 poin / 45分</option><option value="46">46 poin / 46分</option><option value="47">47 poin / 47分</option><option value="48">48 poin / 48分</option><option value="49">49 poin / 49分</option><option value="50">50 poin / 50分</option><option value="51">51 poin / 51分</option><option value="52">52 poin / 52分</option><option value="53">53 poin / 53分</option><option value="54">54 poin / 54分</option><option value="55">55 poin / 55分</option><option value="56">56 poin / 56分</option><option value="57">57 poin / 57分</option><option value="58">58 poin / 58分</option><option value="59">59 poin / 59分</option><option value="60">60 poin / 60分</option><option value="61">61 poin / 61分</option><option value="62">62 poin / 62分</option><option value="63">63 poin / 63分</option><option value="64">64 poin / 64分</option><option value="65">65 poin / 65分</option><option value="66">66 poin / 66分</option><option value="67">67 poin / 67分</option><option value="68">68 poin / 68分</option><option value="69">69 poin / 69分</option><option value="70">70 poin / 70分</option><option value="71">71 poin / 71分</option><option value="72">72 poin / 72分</option><option value="73">73 poin / 73分</option><option value="74">74 poin / 74分</option><option value="75">75 poin / 75分</option><option value="76">76 poin / 76分</option><option value="77">77 poin / 77分</option><option value="78">78 poin / 78分</option><option value="79">79 poin / 79分</option><option value="80">80 poin / 80分</option><option value="81">81 poin / 81分</option><option value="82">82 poin / 82分</option><option value="83">83 poin / 83分</option><option value="84">84 poin / 84分</option><option value="85">85 poin / 85分</option><option value="86">86 poin / 86分</option><option value="87">87 poin / 87分</option><option value="88">88 poin / 88分</option><option value="89">89 poin / 89分</option><option value="90">90 poin / 90分</option><option value="91">91 poin / 91分</option><option value="92">92 poin / 92分</option><option value="93">93 poin / 93分</option><option value="94">94 poin / 94分</option><option value="95">95 poin / 95分</option><option value="96">96 poin / 96分</option><option value="97">97 poin / 97分</option><option value="98">98 poin / 98分</option><option value="99">99 poin / 99分</option><option value="100">100 poin / 100分</option></select></div>
 </div>
 <div class="san-actions"><button class="san-btn primary" type="submit">＋ Simpan Sanksi / 保存处罚</button><button class="san-btn" id="sanReset" type="button">Kosongkan Form / 清空表单</button><button class="san-btn" id="sanExport" type="button">Ekspor CSV / 导出 CSV</button></div>
-<p style="font-size:11px;color:var(--muted);margin:10px 0 0">Data disimpan di browser/perangkat ini. / 数据保存在此浏览器/设备中。</p>
+<p style="font-size:11px;color:var(--muted);margin:10px 0 0">Data disimpan di Supabase dan dapat diakses dari perangkat lain. / 数据保存在云端，可从其他设备访问。</p>
 </form>
 </section>
 <section class="san-kpis">
@@ -572,44 +572,91 @@ nav.sheet-tabs[role="tablist"] > .sheet-tab {
 </div>
 <script>
 (function(){
+'use strict';
 const root=document.getElementById('sheet-sanctions'); if(!root)return;
-const employees = [];
-const nameSelect=document.getElementById('sanName'),teamSelect=document.getElementById('sanTeam'),typeSelect=document.getElementById('sanType'),pointsSelect=document.getElementById('sanPoints'),pointsWrap=document.getElementById('sanPointsWrap');
+const nameSelect=document.getElementById('sanName'),teamSelect=document.getElementById('sanTeam'),typeSelect=document.getElementById('sanType'),pointsSelect=document.getElementById('sanPoints');
 const teamName={A:'Regu A / A班组',B:'Regu B / B班组',C:'Regu C / C班组',R:'Reguler/长白班'};
 const sanctionName={'SP1':'SP1 / 警告处分1','SP2':'SP2 / 警告处分2','SP3':'SP3 / 警告处分3','SPPT':'SPPT / 书面处罚','POTONG POIN':'POTONG POIN / 扣分'};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let records=[]; try{records=JSON.parse(localStorage.getItem('grindingTransferSanctionsV2')||'[]')}catch(e){records=[]}
-let staff=[];
-function refreshSanctionStaff(list){
-  staff=(Array.isArray(list)?list:[]).filter(e=>e&&e.name).map(e=>({name:e.name,team:e.team})).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
-  nameSelect.innerHTML='<option value="">Pilih nama / 选择姓名</option>'+staff.map(e=>`<option value="${esc(e.name)}">${esc(e.name)}</option>`).join('');
-  render();
+let records=[],staff=[],cloudReady=false,busy=false;
+function teamFor(e){
+ const raw=String(e?.team??e?.group??e?.regu??e?.teamRaw??'').toUpperCase();
+ if(raw==='A'||raw.includes('REGU A')||raw.includes('班组A'))return'A';
+ if(raw==='B'||raw.includes('REGU B')||raw.includes('班组B'))return'B';
+ if(raw==='C'||raw.includes('REGU C')||raw.includes('班组C'))return'C';
+ if(raw==='R'||raw.includes('REGULER')||raw.includes('REGULAR')||raw.includes('SUPPORT'))return'R';
+ return '';
 }
-window.addEventListener('dashboard:data-loaded',e=>refreshSanctionStaff(e.detail?.employees||[]));
+function normalizeRow(row){
+ const d=row.details||{};
+ return {id:row.id,employee_id:row.employee_id,date:row.sanction_date||'',name:row.employee_name||'',team:row.team||'',error:d.error||d.violation||'',type:d.type||d.sanction_type||'',points:Number(d.points)||0};
+}
+function refreshSanctionStaff(list){
+ staff=(Array.isArray(list)?list:[]).filter(e=>e&&e.name).map(e=>({id:e.id,name:e.name,team:e.team})).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+ nameSelect.innerHTML='<option value="">Pilih nama / 选择姓名</option>'+staff.map(e=>`<option value="${esc(e.name)}">${esc(e.name)}</option>`).join('');
+}
+function render(){
+ document.getElementById('sanTotal').textContent=records.length;
+ document.getElementById('sanPointTotal').textContent=records.reduce((s,r)=>s+(Number(r.points)||0),0);
+ document.getElementById('sanPeopleTotal').textContent=new Set(records.map(r=>r.name)).size;
+ document.getElementById('sanCountLabel').textContent=`${records.length} catatan / 条记录`;
+ const teamCounts=['A','B','C','R'].map(t=>{const headcount=staff.filter(e=>teamFor(e)===t).length;const score=records.filter(r=>r.team===t).reduce((sum,r)=>sum+(r.type==='POTONG POIN'?100:(['SP1','SP2','SP3','SPPT'].includes(r.type)?50:0)),0);return {label:teamName[t],count:headcount?(score/headcount):0}});
+ document.getElementById('sanTeamChart').innerHTML=teamCounts.map(x=>`<div class="san-bar-row"><span>${esc(x.label)}</span><div class="san-track"><div class="san-fill" style="width:${Math.max(0,Math.min(100,x.count))}%"></div></div><b>${x.count.toFixed(1)}%</b></div>`).join('');
+ const byName={};records.forEach(r=>{const score=r.type==='POTONG POIN'?(Number(r.points)||0):(['SP1','SP2','SP3','SPPT'].includes(r.type)?50:0);byName[r.name]=(byName[r.name]||0)+score});
+ const employeeItems=Object.entries(byName).sort((a,b)=>b[1]-a[1]);
+ document.getElementById('sanEmployeeChart').innerHTML=employeeItems.length?employeeItems.map(([label,score])=>`<div class="san-bar-row"><span>${esc(label)}</span><div class="san-track"><div class="san-fill" style="width:${Math.max(0,Math.min(100,score))}%"></div></div><b>${score.toFixed(1)}%</b></div>`).join(''):'<p style="color:var(--muted)">Belum ada data / 暂无数据</p>';
+ document.getElementById('sanRows').innerHTML=records.map((r,i)=>`<tr><td>${esc(r.date)}</td><td>${esc(r.name)}</td><td>${esc(teamName[r.team]||r.team)}</td><td style="white-space:normal;min-width:200px">${esc(r.error)}</td><td>${esc(sanctionName[r.type]||r.type)}</td><td>${r.type==='POTONG POIN'?esc(r.points):'—'}</td><td><button type="button" class="san-btn" data-san-delete="${i}" ${busy?'disabled':''}>Hapus / 删除</button></td></tr>`).join('')||'<tr><td colspan="7" style="text-align:center;padding:24px">Belum ada catatan sanksi / 暂无处罚记录</td></tr>';
+ document.getElementById('sanctionTabCount').textContent=String(records.length).padStart(2,'0');
+}
+async function reloadFromCloud(){
+ if(!window.DashboardSupabase||!window.__dashboardDataSource) return;
+ const data=await DashboardSupabase.loadDashboard();
+ records=(data.employeeSanctions||[]).map(normalizeRow);
+ render();
+}
+window.addEventListener('dashboard:data-loaded',e=>{
+ refreshSanctionStaff(e.detail?.employees||[]);
+ records=(e.detail?.sanctions||[]).map(normalizeRow);
+ cloudReady=true;render();
+});
 for(let i=1;i<=100;i++)pointsSelect.insertAdjacentHTML('beforeend',`<option value="${i}">${i} poin / ${i}分</option>`);
-function teamFor(e){let raw=String(e?.team??e?.group??e?.regu??e?.teamRaw??'').toUpperCase();if(raw.includes('A'))return'A';if(raw.includes('B'))return'B';if(raw.includes('C'))return'C';if(raw.includes('R')||raw.includes('Reguler')||raw.includes('SUPPORT'))return'R';return''}
-function syncTeam(){const e=staff.find(x=>x.name===nameSelect.value);const t=teamFor(e);if(t){teamSelect.value=t}else{teamSelect.value=''}}
+function syncTeam(){const emp=staff.find(x=>x.name===nameSelect.value);teamSelect.value=emp?teamFor(emp):'';}
 nameSelect.addEventListener('change',syncTeam);
 typeSelect.addEventListener('change',()=>{const isPoints=typeSelect.value==='POTONG POIN';pointsSelect.disabled=!isPoints;pointsSelect.required=isPoints;if(!isPoints)pointsSelect.value='';});
 pointsSelect.disabled=true;
 document.getElementById('sanDate').value=new Date().toISOString().slice(0,10);
-function save(){try{localStorage.setItem('grindingTransferSanctionsV2',JSON.stringify(records))}catch(e){alert('Penyimpanan browser penuh / 浏览器存储空间不足')}}
-function bars(el,items,total){el.innerHTML=items.length?items.map(x=>`<div class="san-bar-row"><span>${esc(x.label)}</span><div class="san-track"><div class="san-fill" style="width:${total?Math.max(0,Math.min(100,x.count/total*100)):0}%"></div></div><b>${total?(x.count/total*100).toFixed(1):'0.0'}%</b></div>`).join(''):'<p style="color:var(--muted)">Belum ada data / 暂无数据</p>'}
-function render(){
-document.getElementById('sanTotal').textContent=records.length;
-document.getElementById('sanPointTotal').textContent=records.reduce((s,r)=>s+(Number(r.points)||0),0);
-document.getElementById('sanPeopleTotal').textContent=new Set(records.map(r=>r.name)).size;
-document.getElementById('sanCountLabel').textContent=`${records.length} catatan / 条记录`;
-const teamCounts=['A','B','C','R'].map(t=>{const headcount=staff.filter(e=>teamFor(e)===t).length;const score=records.filter(r=>r.team===t).reduce((sum,r)=>sum+(r.type==='POTONG POIN'?100:(['SP1','SP2','SP3','SPPT'].includes(r.type)?50:0)),0);return {label:teamName[t],count:headcount?(score/(headcount*100))*100:0}});document.getElementById('sanTeamChart').innerHTML=teamCounts.map(x=>`<div class="san-bar-row"><span>${esc(x.label)}</span><div class="san-track"><div class="san-fill" style="width:${Math.max(0,Math.min(100,x.count))}%"></div></div><b>${x.count.toFixed(1)}%</b></div>`).join('');
-const byName={};records.forEach(r=>{const score=r.type==='POTONG POIN'?(Number(r.points)||0):(['SP1','SP2','SP3','SPPT'].includes(r.type)?50:0);byName[r.name]=(byName[r.name]||0)+score});const employeeItems=Object.entries(byName).sort((a,b)=>b[1]-a[1]);document.getElementById('sanEmployeeChart').innerHTML=employeeItems.length?employeeItems.map(([label,score])=>{const pct=score;return `<div class="san-bar-row"><span>${esc(label)}</span><div class="san-track"><div class="san-fill" style="width:${Math.max(0,Math.min(100,pct))}%"></div></div><b>${pct.toFixed(1)}%</b></div>`}).join(''):'<p style="color:var(--muted)">Belum ada data / 暂无数据</p>';
-document.getElementById('sanRows').innerHTML=records.map((r,i)=>`<tr><td>${esc(r.date)}</td><td>${esc(r.name)}</td><td>${esc(teamName[r.team]||r.team)}</td><td style="white-space:normal;min-width:200px">${esc(r.error)}</td><td>${esc(sanctionName[r.type]||r.type)}</td><td>${r.type==='POTONG POIN'?esc(r.points):'—'}<td><button type="button" class="san-btn" data-san-delete="${i}">Hapus / 删除</button></td></tr>`).join('')||'<tr><td colspan="7" style="text-align:center;padding:24px">Belum ada catatan sanksi / 暂无处罚记录</td></tr>';
-root.querySelectorAll('[data-san-delete]').forEach(b=>b.addEventListener('click',()=>{const i=Number(b.dataset.sanDelete);if(confirm('Hapus catatan ini? / 删除这条记录？')){records.splice(i,1);save();render()}}));
-document.getElementById('sanctionTabCount').textContent=String(records.length).padStart(2,'0');
-}
-document.getElementById('sanctionForm').addEventListener('submit',e=>{e.preventDefault();if(!nameSelect.value||!teamSelect.value||!document.getElementById('sanDate').value||!document.getElementById('sanError').value.trim()||!typeSelect.value||(typeSelect.value==='POTONG POIN'&&!pointsSelect.value)){alert('Lengkapi semua kolom wajib / 请填写所有必填项');return}
-records.unshift({date:document.getElementById('sanDate').value,name:nameSelect.value,team:teamSelect.value,error:document.getElementById('sanError').value.trim(),type:typeSelect.value,points:typeSelect.value==='POTONG POIN'?Number(pointsSelect.value):0});save();render();document.getElementById('sanError').value='';typeSelect.value='';pointsSelect.value='';pointsSelect.disabled=true;pointsSelect.required=false;});
-document.getElementById('sanReset').addEventListener('click',()=>{document.getElementById('sanctionForm').reset();document.getElementById('sanDate').value=new Date().toISOString().slice(0,10);pointsSelect.disabled=true;pointsSelect.required=false;teamSelect.value=''});
-document.getElementById('sanExport').addEventListener('click',()=>{const header=['Tanggal / 日期','Nama / 姓名','Regu / 班组','Kesalahan / 违规事项','Sanksi / 处罚','Potong Poin / 扣分'];const csv=[header,...records.map(r=>[r.date,r.name,teamName[r.team]||r.team,r.error,sanctionName[r.type]||r.type,r.type==='POTONG POIN'?r.points:' '])].map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='data_sanksi_karyawan.csv';a.click();URL.revokeObjectURL(a.href)});
+document.getElementById('sanctionForm').addEventListener('submit',async e=>{
+ e.preventDefault();
+ if(!cloudReady||!window.DashboardSupabase||window.__dashboardDataSource!=='supabase'){alert('Koneksi Supabase belum siap. Silakan login ulang dan coba kembali.');return;}
+ if(busy)return;
+ const emp=staff.find(x=>x.name===nameSelect.value);
+ const date=document.getElementById('sanDate').value,errorText=document.getElementById('sanError').value.trim(),type=typeSelect.value;
+ if(!emp||!teamSelect.value||!date||!errorText||!type||(type==='POTONG POIN'&&!pointsSelect.value)){alert('Lengkapi semua kolom wajib / 请填写所有必填项');return;}
+ const record={employee_id:emp.id||null,employee_name:emp.name,team:teamSelect.value,sanction_date:date,details:{error:errorText,type,points:type==='POTONG POIN'?Number(pointsSelect.value):0}};
+ busy=true;render();
+ try{
+  const saved=await DashboardSupabase.saveSanction(record);
+  records.unshift(normalizeRow(saved));render();
+  document.getElementById('sanError').value='';typeSelect.value='';pointsSelect.value='';pointsSelect.disabled=true;pointsSelect.required=false;
+  alert('Sanksi berhasil disimpan ke Supabase. / 处罚已保存到云端。');
+ }catch(err){console.error('Gagal menyimpan sanksi:',err);alert('Gagal menyimpan ke Supabase: '+(err.message||err));}
+ finally{busy=false;render();}
+});
+root.addEventListener('click',async e=>{
+ const btn=e.target.closest('[data-san-delete]');if(!btn)return;
+ const r=records[Number(btn.dataset.sanDelete)];if(!r?.id)return;
+ if(!confirm('Hapus catatan ini dari Supabase? / 确定从云端删除这条记录吗？'))return;
+ if(busy)return;busy=true;render();
+ try{await DashboardSupabase.deleteSanction(r.id);records=records.filter(x=>x.id!==r.id);render();}
+ catch(err){alert('Gagal menghapus dari Supabase: '+(err.message||err));}
+ finally{busy=false;render();}
+});
+document.getElementById('sanReset').addEventListener('click',()=>{document.getElementById('sanctionForm').reset();document.getElementById('sanDate').value=new Date().toISOString().slice(0,10);pointsSelect.disabled=true;pointsSelect.required=false;teamSelect.value='';});
+document.getElementById('sanExport').addEventListener('click',()=>{
+ const header=['Tanggal / 日期','Nama / 姓名','Regu / 班组','Kesalahan / 违规事项','Sanksi / 处罚','Potong Poin / 扣分'];
+ const csv=[header,...records.map(r=>[r.date,r.name,teamName[r.team]||r.team,r.error,sanctionName[r.type]||r.type,r.type==='POTONG POIN'?r.points:' '])].map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
+ const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='data_sanksi_karyawan.csv';a.click();URL.revokeObjectURL(a.href);
+});
 render();
 })();
 </script>
@@ -909,7 +956,7 @@ async function init(){
         workdays:25, present, percent:present/25*100
       });
     });
-    window.dispatchEvent(new CustomEvent('dashboard:data-loaded',{detail:{employees,attendanceSource}}));
+    window.dispatchEvent(new CustomEvent('dashboard:data-loaded',{detail:{employees,attendanceSource,sanctions:cloudData.employeeSanctions||[]}}));
     if(gate) gate.hidden=true;
     if(status) status.textContent='';
   } catch(error) {
