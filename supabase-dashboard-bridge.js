@@ -150,6 +150,33 @@
     return { user: currentUser, role: currentRole };
   }
 
+  // Create all Viewer accounts through the protected Edge Function.
+  // The logged-in Admin session is attached automatically by Supabase.
+  async function createViewers() {
+    const c = requireClient();
+    requireAdmin();
+
+    if (!currentUser) {
+      throw new Error('Silakan login sebagai Admin terlebih dahulu.');
+    }
+
+    const { data, error } = await c.functions.invoke('create-viewers', {
+      body: {}
+    });
+
+    if (error) {
+      console.error('create-viewers invocation failed:', error);
+      const detail = data?.error || error.message || 'Proses pembuatan akun gagal.';
+      throw new Error(detail);
+    }
+
+    if (!data) {
+      throw new Error('Server tidak memberikan hasil pembuatan akun.');
+    }
+
+    return data;
+  }
+
   async function changePassword(newPassword) {
     const c = requireClient();
     if (!currentUser) throw new Error('Silakan login terlebih dahulu.');
@@ -650,6 +677,7 @@
   global.DashboardSupabase = Object.freeze({
     init,
     signIn,
+    createViewers,
     changePassword,
     signOut,
     getSession,
