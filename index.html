@@ -566,7 +566,7 @@ nav.sheet-tabs[role="tablist"] > .sheet-tab {
 <div class="san-kpi"><span>Total potong poin / 扣分总计</span><b id="sanPointTotal">0</b></div>
 <div class="san-kpi"><span>Karyawan terkena sanksi / 受处罚员工数</span><b id="sanPeopleTotal">0</b></div>
 </section>
-<section class="san-card"><h3>Persentase Kesalahan per Regu / 各班组违规占比</h3><p style="color:var(--muted);font-size:12px">Nilai SP1–SPPT = 50, POTONG POIN = 100. Persentase regu = total nilai sanksi regu ÷ jumlah karyawan regu. / SP1–SPPT计50分，扣分计100分。班组比例 = 班组处罚总分 ÷ 班组员工人数。</p><div class="san-bars" id="sanTeamChart"><div class="san-bar-row"><span>Regu A / A班组</span><div class="san-track"><div class="san-fill" style="width:0%"></div></div><b>0.0%</b></div><div class="san-bar-row"><span>Regu B / B班组</span><div class="san-track"><div class="san-fill" style="width:0%"></div></div><b>0.0%</b></div><div class="san-bar-row"><span>Regu C / C班组</span><div class="san-track"><div class="san-fill" style="width:0%"></div></div><b>0.0%</b></div><div class="san-bar-row"><span>Reguler/长白班</span><div class="san-track"><div class="san-fill" style="width:0%"></div></div><b>0.0%</b></div></div></section>
+<section class="san-card"><h3>Persentase Kesalahan per Regu / 各班组违规占比</h3><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0 12px"><label for="sanMonthFilter" style="font-size:12px;color:var(--muted)">Filter bulan / 月份筛选</label><select id="sanMonthFilter" style="min-width:190px;max-width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text)"><option value="">Semua bulan / 所有月份</option></select></div><p style="color:var(--muted);font-size:12px">Nilai SP1–SPPT = 50 poin; POTONG POIN = sesuai nilai potongan. Persentase regu = total poin sanksi ÷ (jumlah karyawan × 100) × 100%.</p><div class="san-bars" id="sanTeamChart"><div class="san-bar-row"><span>Regu A / A班组</span><div class="san-track"><div class="san-fill" style="width:0%"></div></div><b>0.0%</b></div><div class="san-bar-row"><span>Regu B / B班组</span><div class="san-track"><div class="san-fill" style="width:0%"></div></div><b>0.0%</b></div><div class="san-bar-row"><span>Regu C / C班组</span><div class="san-track"><div class="san-fill" style="width:0%"></div></div><b>0.0%</b></div><div class="san-bar-row"><span>Reguler/长白班</span><div class="san-track"><div class="san-fill" style="width:0%"></div></div><b>0.0%</b></div></div></section>
 <section class="san-card"><h3>Persentase Kesalahan per Karyawan / 各员工违规占比</h3><div class="san-bars" id="sanEmployeeChart"><p style="color:var(--muted)">Belum ada data / 暂无数据</p></div></section>
 <section class="san-card"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap"><h3 style="margin:0">Daftar Sanksi / 处罚记录表</h3><span id="sanCountLabel" style="color:var(--muted);font-size:12px">0 catatan / 条记录</span></div><div class="san-table-wrap" style="margin-top:12px"><table><thead><tr><th>Tanggal / 日期</th><th>Nama / 姓名</th><th>Regu / 班组</th><th>Kesalahan / 违规事项</th><th>Sanksi / 处罚</th><th>Potong Poin / 扣分</th><th>Aksi / 操作</th></tr></thead><tbody id="sanRows"><tr><td colspan="7" style="text-align:center;padding:24px">Belum ada catatan sanksi / 暂无处罚记录</td></tr></tbody></table></div></section>
 </div>
@@ -595,14 +595,34 @@ function refreshSanctionStaff(list){
  staff=(Array.isArray(list)?list:[]).filter(e=>e&&e.name).map(e=>({id:e.id,name:e.name,team:e.team})).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
  nameSelect.innerHTML='<option value="">Pilih nama / 选择姓名</option>'+staff.map(e=>`<option value="${esc(e.name)}">${esc(e.name)}</option>`).join('');
 }
+function scoreOf(r){
+ return r.type==='POTONG POIN'?(Number(r.points)||0):(['SP1','SP2','SP3','SPPT'].includes(r.type)?50:0);
+}
+function selectedMonthRecords(){
+ const month=document.getElementById('sanMonthFilter')?.value||'';
+ return month?records.filter(r=>String(r.date||'').slice(0,7)===month):records;
+}
+function refreshMonthFilter(){
+ const sel=document.getElementById('sanMonthFilter');if(!sel)return;
+ const old=sel.value,months=[...new Set(records.map(r=>String(r.date||'').slice(0,7)).filter(x=>/^\d{4}-\d{2}$/.test(x)))].sort().reverse();
+ sel.innerHTML='<option value="">Semua bulan / 所有月份</option>'+months.map(m=>`<option value="${m}">${m}</option>`).join('');
+ if(months.includes(old))sel.value=old;
+}
 function render(){
  document.getElementById('sanTotal').textContent=records.length;
- document.getElementById('sanPointTotal').textContent=records.reduce((s,r)=>s+(Number(r.points)||0),0);
+ document.getElementById('sanPointTotal').textContent=records.reduce((s,r)=>s+scoreOf(r),0);
  document.getElementById('sanPeopleTotal').textContent=new Set(records.map(r=>r.name)).size;
  document.getElementById('sanCountLabel').textContent=`${records.length} catatan / 条记录`;
- const teamCounts=['A','B','C','R'].map(t=>{const headcount=staff.filter(e=>teamFor(e)===t).length;const score=records.filter(r=>r.team===t).reduce((sum,r)=>sum+(r.type==='POTONG POIN'?100:(['SP1','SP2','SP3','SPPT'].includes(r.type)?50:0)),0);return {label:teamName[t],count:headcount?(score/headcount):0}});
- document.getElementById('sanTeamChart').innerHTML=teamCounts.map(x=>`<div class="san-bar-row"><span>${esc(x.label)}</span><div class="san-track"><div class="san-fill" style="width:${Math.max(0,Math.min(100,x.count))}%"></div></div><b>${x.count.toFixed(1)}%</b></div>`).join('');
- const byName={};records.forEach(r=>{const score=r.type==='POTONG POIN'?(Number(r.points)||0):(['SP1','SP2','SP3','SPPT'].includes(r.type)?50:0);byName[r.name]=(byName[r.name]||0)+score});
+ refreshMonthFilter();
+ const filtered=selectedMonthRecords();
+ const headcounts={A:18,B:17,C:18,R:3};
+ const teamCounts=['A','B','C','R'].map(t=>{
+  const score=filtered.filter(r=>r.team===t).reduce((sum,r)=>sum+scoreOf(r),0);
+  const pct=score/(headcounts[t]*100)*100;
+  return {label:teamName[t],pct};
+ });
+ document.getElementById('sanTeamChart').innerHTML=teamCounts.map(x=>`<div class="san-bar-row"><span>${esc(x.label)}</span><div class="san-track"><div class="san-fill" style="width:${Math.max(0,Math.min(100,x.pct))}%"></div></div><b>${x.pct.toFixed(2)}%</b></div>`).join('');
+ const byName={};filtered.forEach(r=>{byName[r.name]=(byName[r.name]||0)+scoreOf(r)});
  const employeeItems=Object.entries(byName).sort((a,b)=>b[1]-a[1]);
  document.getElementById('sanEmployeeChart').innerHTML=employeeItems.length?employeeItems.map(([label,score])=>`<div class="san-bar-row"><span>${esc(label)}</span><div class="san-track"><div class="san-fill" style="width:${Math.max(0,Math.min(100,score))}%"></div></div><b>${score.toFixed(1)}%</b></div>`).join(''):'<p style="color:var(--muted)">Belum ada data / 暂无数据</p>';
  document.getElementById('sanRows').innerHTML=records.map((r,i)=>`<tr><td>${esc(r.date)}</td><td>${esc(r.name)}</td><td>${esc(teamName[r.team]||r.team)}</td><td style="white-space:normal;min-width:200px">${esc(r.error)}</td><td>${esc(sanctionName[r.type]||r.type)}</td><td>${r.type==='POTONG POIN'?esc(r.points):'—'}</td><td><button type="button" class="san-btn" data-san-delete="${i}" ${busy?'disabled':''}>Hapus / 删除</button></td></tr>`).join('')||'<tr><td colspan="7" style="text-align:center;padding:24px">Belum ada catatan sanksi / 暂无处罚记录</td></tr>';
@@ -619,6 +639,7 @@ window.addEventListener('dashboard:data-loaded',e=>{
  records=(e.detail?.sanctions||[]).map(normalizeRow);
  cloudReady=true;render();
 });
+document.getElementById('sanMonthFilter').addEventListener('change',render);
 for(let i=1;i<=100;i++)pointsSelect.insertAdjacentHTML('beforeend',`<option value="${i}">${i} poin / ${i}分</option>`);
 function syncTeam(){const emp=staff.find(x=>x.name===nameSelect.value);teamSelect.value=emp?teamFor(emp):'';}
 nameSelect.addEventListener('change',syncTeam);
